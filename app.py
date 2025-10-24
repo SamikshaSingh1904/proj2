@@ -10,6 +10,7 @@ import cs304dbi as dbi
 app.secret_key = secrets.token_hex()
 
 # configure DBI
+#new
 
 # For Lookup, use 'wmdb'
 # For CRUD and Ajax, use your personal db
