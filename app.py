@@ -75,6 +75,8 @@ def calendar(date_str=None):
     date_str format: YYYY-MM-DD 
     Renders template for the calendar!
     '''
+    conn = dbi.connect()
+
     if date_str: # Manual URL entry
         try:
             # Parse the date from URL
@@ -92,7 +94,7 @@ def calendar(date_str=None):
     end_of_week = start_of_week + timedelta(days=6)
     
     # Fetch ALL events for the week
-    events = e.get_week_events(start_of_week, end_of_week)
+    events = e.get_week_events(conn, start_of_week, end_of_week)
 
     # Get today's date for highlighting
     today = datetime.now().date()
@@ -590,17 +592,19 @@ def get_event_details(eid):
     given and event eid. Displays full event details and participant info,
     returning JSON for the event side panel
     """
+    conn = dbi.connect()
+    
     # Get event details using event.py module
-    event_data = e.get_event_by_id(eid)
+    event_data = e.get_event_by_id(conn, eid)
     
     if not event_data: # If event DNE
         return jsonify({'error': 'Event not found'}), 404
     
     # Get all participants for event
-    participants = e.get_event_participants(eid)
+    participants = e.get_event_participants(conn, eid)
     
     # Get participant count
-    current_count = e.get_participant_count(eid)
+    current_count = e.get_participant_count(conn, eid)
 
     # Check if current user is logged in AND is creator
     logged_in = 'uid' in session
