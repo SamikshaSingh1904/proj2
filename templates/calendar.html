@@ -143,7 +143,7 @@
                         
                         <!-- Login prompt - shown if not logged in -->
                         <p id="login-prompt">
-                            <a href="/login">Log in</a> 
+                            <a href="{{ url_for('login') }}">Log in</a> 
                             to join events or create your own!
                         </p>
                     </div>
@@ -174,7 +174,7 @@
                         
                         <!-- Login prompt for forum (shown if ! logged in) -->
                         <p id="forum-login-prompt">
-                            <a href="/login">Log in</a> 
+                            <a href="{{ url_for('login') }}">Log in</a> 
                             to join the conversation!
                         </p>
                     </div>
