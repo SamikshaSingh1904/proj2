@@ -1,25 +1,44 @@
+{#
+  base.html
+  Authors: clump
+
+  Purpose:
+    Base template from which all others shall inherit.
+#}
+
 <!doctype html>
-<html lang='en'>
+<html lang="en">
 <head>
-    <meta charset='utf-8'>
-    <!-- for mobile-friendly pages -->
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name=author content="">
+    <meta name="author" content="">
     <title>{{ page_title }}</title>
-    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+    <link rel="stylesheet"
+         href="{{url_for('static', filename = 'style.css')}}">
     {% block head_stuff %} {% endblock %}
 </head>
 <body>
-
 {% block nav %}
 <nav>
-  <ul>
+  <ul class="nav-left">
     <li><a href="{{url_for('index')}}">Home</a></li>
+    <li><a href="{{url_for('forum')}}">Forum</a></li>
     <li><a href="{{url_for('about')}}">About</a></li>
+  </ul>
+
+  <h1 class="nav-center">clump</h1>
+
+  <ul class="nav-right">
+    {% if session.uid %}
+        <li><a href="{{url_for('profile')}}">Profile</a></li>
+        <li><a href="{{url_for('logout')}}">Logout</a></li>
+    {% else %}
+        <li><a href="{{url_for('login')}}">Login</a></li>
+        <li><a href="{{url_for('signup')}}">Sign Up</a></li>
+    {% endif %}
   </ul>
 </nav>
 {% endblock %}
-
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}

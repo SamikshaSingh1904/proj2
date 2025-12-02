@@ -1,0 +1,188 @@
+{#
+  calendar.html
+  Authors: clump
+
+  Purpose:
+    Display the main calendar home page.
+#}
+
+{% extends "base.html" %}
+
+{% block main_content %}
+    <div class="calendar-container">
+        <!-- Left side: Calendar -->
+        <div class="calendar-section" 
+            data-week-start="{{ week_start.strftime('%Y-%m-%d') }}">
+            <div class="calendar-header">
+                <div class="nav-left">
+                    <button id="prev-week" 
+                            class="nav-btn">← Previous Week
+                    </button>
+                    <button id="today-btn" 
+                            class="today-btn">Today
+                    </button>
+                </div>
+                <h2 id="current-week-display">
+                    Week of {{ week_start.strftime('%b %d') }} - 
+                    {{ week_end.strftime('%b %d, %Y') }}
+                </h2>
+                <div class="nav-right">
+                    <a href="{{ url_for('create_event') }}" 
+                        class="add-event-btn">+ Add Event</a>
+                    <button id="next-week" 
+                            class="nav-btn">Next Week →
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="day-header">Sunday</div>
+                <div class="day-header">Monday</div>
+                <div class="day-header">Tuesday</div>
+                <div class="day-header">Wednesday</div>
+                <div class="day-header">Thursday</div>
+                <div class="day-header">Friday</div>
+                <div class="day-header">Saturday</div>
+
+                {% for day in range(7) %}
+                {% set current_date = (week_start + timedelta(days=day)) %}
+                {% set is_today = (current_date == today) %}
+                <div class="day-column 
+                            {% if is_today %}today-highlight{% endif %}" 
+                    data-day="{{ day }}" 
+                    data-date="{{ current_date.strftime('%Y-%m-%d') }}">
+                    <div class="date-label 
+                                {% if is_today %}today-date{% endif %}">
+                        {{ current_date.strftime('%d') }}
+                        {% if is_today %}
+                        <span class="today-indicator">Today</span>
+                        {% endif %}
+                    </div>
+                    <div class="events-container">
+                        {% for event in events %}
+                            {% if event.date.strftime('%Y-%m-%d') 
+                            == current_date.strftime('%Y-%m-%d') %}
+                            <div class="event-block" 
+                                data-eid="{{ event.eid }}">
+                                <div class="event-time">
+                                    {{ event.start_formatted }}
+                                </div>
+                                <div class="event-cal-title">
+                                    {{ event.title }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right side: Event Detail Panel (hidden by default) -->
+        <div id="event-panel" class="event-panel" aria-hidden="true">
+            <div class="panel-header">
+                <h2 id="panel-event-title">Event Details</h2>
+                <button class="close-panel-btn" 
+                        aria-label="Close event details panel">×
+                </button>
+            </div>
+            <div class="panel-body">
+                <div class="event-detail-section">
+                    <h3>Details</h3>
+                    <p><strong>Date:</strong> 
+                        <span id="panel-event-date"></span>
+                    </p>
+                    <p><strong>Time:</strong> 
+                        <span id="panel-event-time"></span>
+                    </p>
+                    <p><strong>Location:</strong> 
+                        <span id="panel-event-location"></span>
+                    </p>
+                    <p><strong>Category:</strong> 
+                        <span id="panel-event-category"></span>
+                    </p>
+                    <p><strong>Created by:</strong> 
+                        <span id="panel-event-creator"></span>
+                    </p>
+                    <p><strong>Description:</strong></p>
+                    <p id="panel-event-desc"></p>
+                </div>
+
+                <div class="event-detail-section">
+                    <h3>Participants</h3>
+                    <p id="panel-event-capacity"></p>
+                    <ul id="panel-participants-list"></ul>
+                    
+                    <!-- Action buttons, conditional based on login status -->
+                    <div id="event-actions">
+                        <!-- Join button - shown if logged in, not creator, 
+                            not participant, and space available -->
+                        <button id="join-event-btn" 
+                                class="action-btn join-btn">
+                            Join Event
+                        </button>
+                        
+                        <!-- Leave button - shown if logged in, not creator,
+                            and is participant -->
+                        <button id="leave-event-btn" 
+                                class="action-btn leave-btn">
+                            Leave Event
+                        </button>
+                        
+                        <!-- Edit/Delete buttons - 
+                            shown only if user is creator -->
+                        <button id="edit-event-btn" 
+                                class="action-btn edit-btn">
+                            Edit Event
+                        </button>
+                        <button id="delete-event-btn" 
+                                class="action-btn delete-btn">
+                            Delete Event
+                        </button>
+                        
+                        <!-- Login prompt - shown if not logged in -->
+                        <p id="login-prompt">
+                            <a href="/login">Log in</a> 
+                            to join events or create your own!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="event-detail-section">
+                    <h3>Discussion Forum</h3>
+                    <div id="forum-container">
+                        <!-- Comment form (only shown if logged in) -->
+                        <div id="comment-form-container">
+                            <label for="comment-text" 
+                                    class="visually-hidden">
+                                Your comment
+                            </label>
+                            <textarea id="comment-text" 
+                                    placeholder="Share your thoughts...">
+                            </textarea>
+                            <button id="submit-comment-btn" 
+                                    class="action-btn join-btn">
+                                Post Comment
+                            </button>
+                        </div>
+                        
+                        <!-- Comments list -->
+                        <div id="forum-comments">
+                            <p class="placeholder-text">Loading comments...</p>
+                        </div>
+                        
+                        <!-- Login prompt for forum (shown if ! logged in) -->
+                        <p id="forum-login-prompt">
+                            <a href="/login">Log in</a> 
+                            to join the conversation!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
+
+{% endblock %}

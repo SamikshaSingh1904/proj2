@@ -1,0 +1,127 @@
+{#
+  signup.html
+  Authors: clump
+  Purpose:
+    Display the user registration form
+    to create a new account.
+#}
+
+{% extends "base.html" %}
+
+{% block nav %}
+<nav>
+  <ul>
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+    <li><a href="{{ url_for('forum') }}">Forum</a></li>
+    <li><a href="{{ url_for('about') }}">About</a></li>
+  </ul>
+</nav>
+{% endblock %}
+
+{% block main_content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Join clump</h1>
+    <p class="auth-subtitle">
+      Create your account to start connecting with
+      the Wellesley community
+    </p>
+
+    <form method="POST"
+          action="{{ url_for('signup') }}">
+
+      <div class="form-group">
+        <label for="name">
+          Full Name <span class="required">*</span>
+        </label>
+        <input type="text"
+               id="name"
+               name="name"
+               placeholder="Jane Doe"
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">
+          Wellesley Email <span class="required">*</span>
+        </label>
+        <input type="email"
+               id="email"
+               name="email"
+               placeholder="your.name@wellesley.edu"
+               pattern=".*@wellesley\.edu$"
+               required>
+        <p class="helper-text">
+          Must use your @wellesley.edu email address
+        </p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="year">Class Year</label>
+          <select id="year" name="year">
+            <option value="">Select year...</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pronouns">Pronouns</label>
+          <input type="text"
+                 id="pronouns"
+                 name="pronouns"
+                 placeholder="she/her, they/them, etc.">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bio">Bio (Optional)</label>
+        <textarea id="bio"
+                  name="bio"
+                  placeholder="Tell us a bit about yourself...">
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          Password <span class="required">*</span>
+        </label>
+        <input type="password"
+               id="password"
+               name="password"
+               placeholder="Create a password"
+               minlength="8"
+               required>
+        <p class="helper-text">
+          Must be at least 8 characters
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">
+          Confirm Password <span class="required">*</span>
+        </label>
+        <input type="password"
+               id="confirm_password"
+               name="confirm_password"
+               placeholder="Re-enter your password"
+               minlength="8"
+               required>
+      </div>
+
+      <button type="submit"
+              class="btn-submit">
+        Sign Up
+      </button>
+    </form>
+
+    <div class="auth-switch">
+      Already have an account?
+      <a href="{{ url_for('login') }}">Log in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

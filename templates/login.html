@@ -1,0 +1,55 @@
+{#
+  login.html
+  Authors: clump
+
+  Purpose:
+    Display the login form for existing users.
+#}
+
+{% extends "base.html" %}
+
+{% block nav %}
+<nav>
+  <ul>
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+    <li><a href="{{ url_for('forum') }}">Forum</a></li>
+    <li><a href="{{ url_for('about') }}">About</a></li>
+  </ul>
+</nav>
+{% endblock %}
+
+{% block main_content %}
+<div class="auth-container login-container">
+    <div class="auth-card">
+        <h1>Welcome to clump</h1>
+        <p class="auth-subtitle">
+          Log in to join events and connect with your community
+        </p>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email">Email 
+                  <span class="required">*</span>
+                </label>
+                <input type="email" id="email" name="email" 
+                       placeholder="your.name@wellesley.edu" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password 
+                  <span class="required">*</span>
+                </label>
+                <input type="password" id="password" name="password" 
+                       placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Log In</button>
+        </form>
+
+        <div class="auth-switch">
+            Don't have an account? 
+            <a href="{{ url_for('signup') }}">Sign up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

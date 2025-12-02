@@ -1,0 +1,211 @@
+{#
+    event_forum.html
+    Authors: clump
+  
+    Purpose:
+      Displays detailed information for a specific event, including
+      description, participants, and comments. Allows users to join,
+      leave, and discuss events.
+#}
+
+{% extends "base.html" %}
+
+{% block main_content %}
+<div class="event-forum-container">
+    <a href="{{ url_for('forum') }}" class="back-link">
+        ← Back to Forum
+    </a>
+
+    <div class="event-detail">
+        <div class="event-header">
+            <div class="event-meta">
+                <span class="event-category {{ event.category.split()[0] }}">
+                    {% if event.category == 'Carpooling' %}🚗
+                    {% elif event.category == 'Hobby & Fitness' %}🏋️
+                    {% elif event.category == 'Help & Support' %}🌱
+                    {% elif event.category == 'Study Groups' %}📚
+                    {% elif event.category == 'Social Events' %}🎉
+                    {% endif %}
+                    {{ event.category }}
+                </span>
+                Posted by <strong>{{ event.creator_name }}</strong>
+            </div>
+            <div class="event-title">{{ event.title }}</div>
+            <div class="event-description">{{ event.desc }}</div>
+        </div>
+
+        <div class="event-info">
+            <div class="info-item">
+                <span class="info-label">📅 Date & Time</span>
+                <span class="info-value">
+                    {{ event.date.strftime('%B %d, %Y') }}<br>
+                    {{ event.start_formatted }} - 
+                    {{ event.end_formatted }}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📍 Location</span>
+                <span class="info-value">
+                    {{ event.city }}, {{ event.state }}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">👥 Capacity</span>
+                <span class="info-value">
+                    {{ event.participant_count }}/{{ event.cap }} 
+                    spots filled
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">⏰ Flexible Time</span>
+                <span class="info-value">
+                    {{ 'Yes' if event.flexible else 'No' }}
+                </span>
+            </div>
+        </div>
+
+        {% if event.participants %}
+        <div class="participants-section">
+            <div class="participants-title">
+                Participants ({{ event.participant_count }})
+            </div>
+            <div class="participants-list">
+                {% for participant in event.participants %}
+                    <span class="participant-badge">
+                        {{ participant.name }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="event-actions">
+            {% if session.uid %}
+                {% set user_is_participant = 
+                    event.participants|selectattr(
+                        'uid', 'equalto', session.uid
+                    )|list|length > 0 
+                %}
+                {% set is_creator = 
+                    session.uid == event.creator_uid 
+                %}
+                
+                {% if not user_is_participant and not is_creator %}
+                    <form method="POST" 
+                          action="{{ url_for(
+                              'join_event', eid=event.eid
+                          ) }}">
+                        <button type="submit" 
+                                class="btn btn-join" 
+                                {% if event.participant_count 
+                                    >= event.cap %}
+                                    disabled
+                                {% endif %}>
+                            {% if event.participant_count 
+                                >= event.cap %}
+                                Event Full
+                            {% else %}
+                                Join Event
+                            {% endif %}
+                        </button>
+                    </form>
+                {% elif user_is_participant and not is_creator %}
+                    <form method="POST" 
+                          action="{{ url_for(
+                              'leave_event', eid=event.eid
+                          ) }}"
+                          onsubmit="return confirm(
+                              'Are you sure you want to leave?'
+                          )">
+                        <button type="submit" class="btn btn-leave">
+                            Leave Event
+                        </button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p>
+                    <a href="{{ url_for('login') }}" 
+                       class="login-link">
+                        Log in
+                    </a> 
+                    to join this event
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="comment-form">
+        <h3>Add a Comment</h3>
+        {% if session.uid %}
+            <form method="POST" 
+                  action="{{ url_for(
+                      'add_comment_to_event', eid=event.eid
+                  ) }}">
+                <label for="comment-text">Your Comment</label>
+                <textarea id="comment-text"
+                          name="text" 
+                          placeholder="Share your thoughts..." 
+                          required>
+                </textarea>
+                <button type="submit" class="btn-submit">
+                    Comment
+                </button>
+            </form>
+        {% else %}
+            <p>
+                You must be logged in to comment.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="comments-section">
+        <div class="comments-header">
+            Comments ({{ comments|length }})
+        </div>
+
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <div class="comment-author-info">
+                        <span class="comment-author">
+                            {{ comment.author_name }}
+                        </span>
+                        <span class="comment-time">
+                            {% if comment.postedAt %}
+                                {{ comment.postedAt|time_ago }}
+                            {% else %}
+                                just now
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if session.uid == comment.author_uid %}
+                        <form method="POST" 
+                              action="{{ url_for(
+                                  'delete_comment', 
+                                  commId=comment.commId
+                              ) }}"
+                              class="delete-comment-form"
+                              onsubmit="return confirm(
+                                  'Delete this comment?'
+                              )">
+                            <button type="submit" 
+                                    class="delete-comment-btn">
+                                Delete
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="comment-content">
+                    {{ comment.text }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-comments">
+                No comments yet. Be the first to comment!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

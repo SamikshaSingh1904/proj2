@@ -1,0 +1,123 @@
+{#
+    profile.html
+    Authors: clump
+    Purpose:
+      Display the logged-in user's profile: personal info,
+      events they created, and events they attend.
+  #}
+  
+  {% extends "base.html" %}
+  
+  {% block main_content %}
+  <div class="profile-container">
+    <div class="profile-header">
+      <div class="profile-info">
+        <div class="profile-avatar">
+          {{ user.name[0].upper() }}
+        </div>
+        <div class="profile-details">
+          <div class="profile-name">{{ user.name }}</div>
+          <div class="profile-meta">
+            <div class="profile-meta-item">
+              📧 {{ user.email }}
+            </div>
+            {% if user.year %}
+            <div class="profile-meta-item">
+              🎓 Class of {{ user.year }}
+            </div>
+            {% endif %}
+            {% if user.pronouns %}
+            <div class="profile-meta-item">
+              {{ user.pronouns }}
+            </div>
+            {% endif %}
+          </div>
+          {% if user.bio %}
+          <div class="profile-bio">{{ user.bio }}</div>
+          {% endif %}
+          <div class="logout-container">
+            <a href="{{ url_for('logout') }}"
+               class="logout-btn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="events-section">
+      <h2 class="section-title">
+        My Events ({{ created_events|length }})
+      </h2>
+  
+      {% if created_events %}
+      <div class="event-list">
+        {% for event in created_events %}
+        <div class="event-item"
+             data-event-url="{{ url_for(
+               'view_event_forum', eid=event.eid) }}">
+          <div class="event-item-header">
+            <div class="event-item-title">
+              {{ event.title }}
+            </div>
+            <span class="event-category-badge">
+              {{ event.category }}
+            </span>
+          </div>
+          <div class="event-item-info">
+            📅 {{ event.date.strftime('%b %d, %Y') }}
+            at {{ event.start_formatted }} •
+            👥 {{ event.participant_count }}
+            participant{{ 's'
+              if event.participant_count != 1 else '' }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        You haven't created any events yet.
+      </div>
+      {% endif %}
+    </div>
+  
+    <div class="events-section">
+      <h2 class="section-title">
+        Events I'm Attending ({{ joined_events|length }})
+      </h2>
+  
+      {% if joined_events %}
+      <div class="event-list">
+        {% for event in joined_events %}
+        <div class="event-item"
+             data-event-url="{{ url_for(
+               'view_event_forum', eid=event.eid) }}">
+          <div class="event-item-header">
+            <div class="event-item-title">
+              {{ event.title }}
+            </div>
+            <span class="event-category-badge">
+              {{ event.category }}
+            </span>
+          </div>
+          <div class="event-item-info">
+            📅 {{ event.date.strftime('%b %d, %Y') }}
+            at {{ event.start_formatted }} •
+            Created by {{ event.creator_name }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        You haven't joined any events yet.
+        <a href="{{ url_for('forum') }}">Browse events</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endblock %}
+  
+  {% block scripts %}
+  <script src="{{ url_for('static',
+                          filename='js/profile.js') }}">
+  </script>
+  {% endblock %}

@@ -1,88 +1,1522 @@
-/* the --color-header and others are CSS variables, which we access later. 
-   I chose these colors using https://venngage.com/tools/accessible-color-palette-generator
-   I liked the contrasting palette2 colors.
+/*
+  style.css
+  Authors: clump (all members)
 
-   The idea is that
-
-   * the header (blue family) color is for headers and the background color of the nav bar buttons.
-   * the nav bar will have white text on the header bgcolor
-   * the nav bar will use the focus (greenish) color for 
-
+  Purpose:
+    Main stylesheet for the application, providing styles for all pages
+    including navigation, calendar, forum, events, profile, and authentication.
 */
 
-HTML {
-    --color-header: #0073e6;  /* for H1-H6 and nav buttons. */
-    --color-focus: #5ba300;   /* for focussed elements and mouseover on nav */
-    --color-alert: #b51963;   /* for flashed messages and such. */
-    --color-nav-fg: white;    /* foreground color of nav text. */
-    --font-family: Verdana;
-    font-family: var(--font-family)
+
+
+
+/* ====================================================================*/
+/* GLOBAL THEME VARIABLES */
+/* ====================================================================*/
+
+:root {
+    --color-bg: #f5f5f5;
+    --color-text: #333333;
+
+    --color-header: #2c3e50;
+    --color-header-light: #34495e;
+    --color-header-text: #ecf0f1;
+
+    /* Darker, higher-contrast blues */
+    --color-primary: #0b63ce;
+    --color-primary-dark: #084c9c;
+
+    /* Darker, higher-contrast greens */
+    --color-success: #2d6a4f;
+    --color-success-dark: #145c2e;
+
+    /* Darker, higher-contrast orange */
+    --color-accent: #b54708;
+    --color-accent-dark: #8c3d00;
+
+    /* Darker danger red */
+    --color-danger: #c0392b;
+
+    /* Darker muted text for better contrast on light backgrounds */
+    --color-muted: #4a4a4a;
+    --color-panel-bg: #ffffff;
 }
 
-/* For flashed messages; make them stand out using reddish and italics */
+/* ======================================================================== */
+/* GENERAL STYLES */
+/* ======================================================================== */
 
-#messages {
-    color: var(--color-alert);
-    font-style: italic;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
 
-h1, h2, h3, h4, h5, h6 {
+/* Center text in main content */
+.center-text {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.center-text p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Links */
+.login-link {
     color: var(--color-header);
+    text-decoration: underline;
+    font-weight: 600;
 }
 
-h1 {
-    font-size: 200%;
+.login-link:hover {
+    color: var(--color-primary);
 }
-    
 
-/* for a simple navbar. Talk to Scott if you want drop-downs. */
-nav > ul {
+/* ========================================================================= */
+/* NAVBAR */
+/* ========================================================================= */
+
+.navbar {
+    background-color: var(--color-header);
+    padding: 1rem 2rem;
     display: flex;
-    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-brand h1 {
+    color: var(--color-header-text);
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: var(--color-header-text);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--color-primary);
+}
+
+/* Nav styling to match buttons */
+nav {
+    background-color: var(--color-header);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 nav ul {
-    list-style-type: none;
-    margin: 0px;
-    padding: 0px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
 }
 
-nav > ul > li {
-    flex: 0 0 auto;
-    width: 15em; 
+nav ul li a {
+    background-color: var(--color-header-light);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background-color 0.3s, transform 0.2s;
+    display: inline-block;
 }
 
-nav button, nav a {
-    display: block;
-    box-sizing: border-box; /* easier to make button and A the same size */
-    width: 100%;
-    height: 40px;
-    padding: 0px;
-    padding-bottom: 5px;
-    background-color: var(--color-header);
-    color: var(--color-nav-fg);
-    border: 2px solid black;
+nav ul li a:hover {
+    background-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-left {
+    justify-content: flex-start;
+}
+
+.nav-right {
+    justify-content: flex-end;
+}
+
+.nav-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--color-header-text);
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* ========================================================================= */
+/* SHARED EVENT LABEL STYLES (CATEGORY + STATUS) */
+/* ========================================================================= */
+
+.event-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+/* Category-specific colors */
+.event-category.Carpooling { background-color: #fff3cd; color: #856404; }
+.event-category.Hobby      { background-color: #d1ecf1; color: #0c5460; }
+.event-category.Help       { background-color: #f8d7da; color: #721c24; }
+.event-category.Study      { background-color: #e7e7ff; color: #383d9d; }
+.event-category.Social     { background-color: #d4edda; color: #155724; }
+
+.event-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.event-status.ongoing   { background-color: #cce5ff; color: #004085; }
+.event-status.completed { background-color: #d4edda; color: #155724; }
+.event-status.pending   { background-color: #fff3cd; color: #856404; }
+
+/* ========================================================================= */
+/* CALENDAR LAYOUT */
+/* ========================================================================= */
+
+/* Split Screen Container */
+.calendar-container {
+    display: flex;
+    gap: 0;
+    height: calc(100vh - 120px);
+    max-width: 100%;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.calendar-section {
+    flex: 1;
+    overflow-y: auto;
+    transition: flex 0.3s ease;
+}
+
+.calendar-container:has(.panel-open) .calendar-section {
+    flex: 0 0 60%;
+}
+
+/* Calendar Header */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: var(--color-panel-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-header h2 {
+    color: var(--color-header);
+    font-size: 1.5rem;
+}
+
+.nav-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
     border-radius: 5px;
     cursor: pointer;
-    /* Firefox uses font -apple-system unless I repeat the font spec here. */
-    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.nav-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.today-btn {
+    background-color: var(--color-success);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
     font-weight: bold;
-    font-size: 1.4rem;
+    transition: background-color 0.3s;
 }
 
-/* Only the top-level buttons are centered; lower ones are left-aligned. */
-nav > ul > li > button , nav > ul > li > a {
+.today-btn:hover {
+    background-color: var(--color-success-dark);
+}
+
+.add-event-btn {
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.add-event-btn:hover {
+    background-color: var(--color-accent-dark);
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.day-header {
+    background-color: var(--color-header-light);
+    color: white;
+    padding: 1rem;
     text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
 }
 
-/* because of the margin trick, this can only be used for the last element */
-
-nav li.right {
-    margin-left: auto;
+.day-column {
+    background-color: white;
+    min-height: 150px;
+    padding: 0.5rem;
+    position: relative;
 }
 
-nav button:hover, button:focus, nav a:hover, nav a:focus {
-    background-color: var(--color-focus);
+/* Highlight today's column */
+.day-column.today-highlight {
+    background-color: #fff8e1;
+    border: 2px solid #ffd54f;
 }
 
+.date-label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+}
+
+/* Style today's date differently */
+.date-label.today-date {
+    color: #f39c12;
+    font-size: 1.3rem;
+}
+
+.today-indicator {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.events-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Event Blocks */
+.event-block {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 0.9rem;
+}
+
+.event-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.event-time {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.event-title {
+    font-size: 0.85rem;
+}
+
+/* ========================================================================= */
+/* MODAL STYLES */
+/* ========================================================================= */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #ecf0f1;
+}
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* ========================================================================= */
+/* EVENT PANEL (SPLIT SCREEN) */
+/* ========================================================================= */
+
+.event-panel {
+    position: fixed;
+    right: -45%;
+    top: 0;
+    width: 40%;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+    transition: right 0.3s ease;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-panel.panel-open {
+    right: 0;
+}
+
+.panel-header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-panel-btn {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    padding: 0;
+}
+
+.close-panel-btn:hover {
+    color: #ecf0f1;
+}
+
+.panel-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.event-detail-section {
+    margin-bottom: 2rem;
+}
+
+.event-detail-section h3 {
+    color: var(--color-header);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 0.5rem;
+}
+
+.event-detail-section p {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.event-detail-section strong {
+    color: var(--color-header);
+}
+
+#modal-participants-list,
+#panel-participants-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+#modal-participants-list li,
+#panel-participants-list li {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+}
+
+.placeholder-text {
+    color: var(--color-muted);
+    font-style: italic;
+}
+
+/* Action buttons for events */
+.action-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.join-btn {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.join-btn:hover {
+    background-color: var(--color-success-dark);
+}
+
+.leave-btn {
+    background-color: var(--color-accent);
+    color: white;
+}
+
+.leave-btn:hover {
+    background-color: var(--color-accent-dark);
+}
+
+.edit-btn {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.delete-btn {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #8b1e21;
+}
+
+#login-prompt a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* ========================================================================= */
+/* FLASH MESSAGES */
+/* ========================================================================= */
+
+#messages {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: 90%;
+    max-width: 500px;
+}
+
+#messages p {
+    /* darker red for stronger contrast with white text */
+    background-color: rgba(192, 57, 43, 0.95);
+    color: white;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-size: 1rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================================================= */
+/* RESPONSIVE DESIGN */
+/* ========================================================================= */
+
+@media (max-width: 768px) {
+    .calendar-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .day-header:not(:first-child) {
+        display: none;
+    }
+    
+    .calendar-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .modal-content,
+    .event-panel {
+        width: 95%;
+    }
+    
+    .event-panel {
+        right: -100%;
+        width: 100%;
+    }
+    
+    .calendar-container {
+        flex-direction: column;
+    }
+
+    .forum-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+/* ========================================================================= */
+/* AUTHENTICATION PAGES */
+/* ========================================================================= */
+
+.auth-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.auth-card {
+    background-color: #fff;
+    border: 2px solid var(--color-header);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.auth-card h1 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-header);
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-header);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Shared submit button for auth + comment forms */
+.btn-submit {
+    width: 100%;
+    background-color: var(--color-header);
+    color: white;
+    border: 2px solid var(--color-header);
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    color: #666;
+}
+
+.auth-switch a {
+    color: var(--color-header);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Login page specific - smaller container */
+.auth-container.login-container {
+    max-width: 500px;
+}
+
+/* ========================================================================= */
+/* EVENT FORUM PAGE */
+/* ========================================================================= */
+
+.event-forum-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--color-header);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+.event-detail {
+    background-color: #fff;
+    border: 2px solid var(--color-header);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 25px;
+}
+
+.event-header {
+    margin-bottom: 20px;
+}
+
+.event-meta {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.event-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--color-header);
+}
+
+.event-cal-title {
+    font-size: 12px;
+    font-weight: 400;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.event-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.event-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    font-size: 14px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #666;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.info-value {
+    color: #333;
+}
+
+.participants-section {
+    margin-bottom: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.participants-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--color-header);
+}
+
+.participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.participant-badge {
+    background-color: #e9ecef;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #333;
+}
+
+.event-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 2px solid #e0e0e0;
+}
+
+/* Generic button shell used here */
+.btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.btn-join {
+    background-color: var(--color-header);
+    color: white;
+    border-color: var(--color-header);
+}
+
+.btn-join:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-join:disabled {
+    background-color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-leave {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.btn-leave:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+.comment-form,
+.comments-section {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.comment-form h3,
+.comments-header {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--color-header);
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: var(--color-header);
+}
+
+.comment {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.comment:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.comment-author-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--color-header);
+    font-size: 14px;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: #666;
+}
+
+.comment-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.delete-comment-btn {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-weight: 600;
+}
+
+.delete-comment-btn:hover {
+    text-decoration: underline;
+}
+
+.empty-comments {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+/* Visually hidden but accessible to screen readers */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ========================================================================= */
+/* CALENDAR.JS - FORUM COMMENT STYLES */
+/* ========================================================================= */
+
+/* Forum Comment Container */
+.forum-comment {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid #3498db;
+}
+
+/* Comment Header */
+.forum-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Comment Author */
+.forum-comment-author {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Comment Time */
+.forum-comment-time {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+/* Comment Text */
+.forum-comment-text {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Small Delete Button in Comments */
+.forum-comment .delete-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    margin-top: 0.5rem;
+}
+
+/* Event Full Message */
+.event-full-message {
+    color: #e74c3c;
+}
+
+/* Error Message in Comments */
+.comment-error-message {
+    color: #e74c3c;
+}
+
+/* ========================================================================= */
+/* CALENDAR EVENT PANEL - ADDITIONAL STYLES */
+/* ========================================================================= */
+
+/* Event Panel Action Buttons Container */
+#event-actions {
+    margin-top: 1rem;
+}
+
+/* Comment Form Container */
+#comment-form-container {
+    display: none;
+    margin-bottom: 1.5rem;
+}
+
+/* Comment Textarea in Panel */
+#comment-text {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+/* Submit Comment Button Spacing */
+#submit-comment-btn {
+    margin-top: 0.5rem;
+}
+
+/* Login Prompts in Panel */
+#login-prompt,
+#forum-login-prompt {
+    display: none;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+#login-prompt a,
+#forum-login-prompt a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Action Buttons - Hidden by Default (JavaScript will show them) */
+#join-event-btn,
+#leave-event-btn,
+#edit-event-btn,
+#delete-event-btn {
+    display: none;
+}
+
+/* ========================================================================= */
+/* FORUM PAGE */
+/* ========================================================================= */
+
+.forum-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.forum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.forum-header-left h1 {
+    margin: 0 0 5px 0;
+}
+
+.forum-header-left p {
+    margin: 0;
+    color: #666;
+}
+
+/* Filter forum button (final definition) */
+.filter-btn {
+    background-color: var(--color-accent);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    white-space: nowrap;
+    border: 2px solid var(--color-accent);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.filter-btn:hover {
+    background-color: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.event-card {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.event-card:hover {
+    border-color: var(--color-header);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.participant-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    border-right: 2px solid #e0e0e0;
+}
+
+.participant-count {
+    font-weight: bold;
+    font-size: 24px;
+    color: var(--color-header);
+}
+
+.participant-label {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.event-content {
+    padding: 15px;
+    flex: 1;
+}
+
+/* reuse .event-meta, .event-title, .event-description definitions above */
+
+.event-details {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.event-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-badge {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.capacity-indicator {
+    font-weight: 600;
+    color: var(--color-header);
+}
+
+.capacity-indicator.full {
+    color: var(--color-danger);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #ccc;
+}
+
+.empty-state h2 {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* darker text instead of #999 for contrast on light bg */
+.empty-state p {
+    color: #666;
+}
+
+/* ========================================================================= */
+/* PROFILE PAGE */
+/* ========================================================================= */
+
+.profile-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.profile-header {
+    background-color: #fff;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.profile-info {
+    display: flex;
+    align-items: start;
+    gap: 20px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+.profile-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #666;
+}
+
+.profile-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.profile-bio {
+    color: #333;
+    line-height: 1.6;
+    margin-top: 12px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.events-section {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.event-list {
+    display: grid;
+    gap: 15px;
+}
+
+.event-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.event-item:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.event-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+
+.event-item-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #007bff;
+}
+
+.event-category-badge {
+    background-color: #e9ecef;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Make profile empty-state slightly different without overriding forum one */
+.profile-container .empty-state {
+    padding: 40px;
+    color: #666;
+    background-color: transparent;
+    border-style: solid;
+}
+
+.logout-btn {
+    background-color: #6c757d;
+    color: white;
+    border: 2px solid #6c757d;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+
+/* Event Forum Page - Additional Styles */
+
+.event-actions p {
+    color: #666;
+    font-size: 14px;
+}
+
+.comment-form p {
+    color: #666;
+}
+
+.delete-comment-form {
+    display: inline;
+}
+
+.empty-state a {
+    color: #2c3e50;
+}
+
+.logout-container {
+    margin-top: 15px;
+}
+
+.empty-state a {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
+.empty-state a:hover {
+    color: #3498db;
+}
