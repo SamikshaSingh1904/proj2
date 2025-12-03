@@ -35,9 +35,21 @@
           {% if user.bio %}
           <div class="profile-bio">{{ user.bio }}</div>
           {% endif %}
-          <div class="logout-container">
+          <div class="profile-actions">
+            <a href="{{ url_for('edit_profile') }}" 
+              class="profile-btn edit-btn">Edit Profile</a>
             <a href="{{ url_for('logout') }}"
-               class="logout-btn">Logout</a>
+              class="profile-btn logout-btn">Logout</a>
+            <form method="POST" 
+                  action="{{ url_for('delete_account') }}"
+                  style="display: inline;"
+                  onsubmit="return confirm
+                  ('Are you sure you want to delete your account? This action \
+                  cannot be undone and will delete all your events.')">
+              <button type="submit" class="profile-btn delete-btn">
+                Delete Account
+              </button>
+            </form>
           </div>
         </div>
       </div>
