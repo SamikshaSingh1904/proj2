@@ -1,118 +1,141 @@
-<form action="{{ url_for('edit_event', eid=event.eid) }}" method="POST">
+{#
+  edit_event.html
+  Authors: Beatrix
 
-  <div class="form-group">
-    <label for="event-title">Title <span class="required">*</span></label>
-    <input type="text"
-           id="event-title"
-           name="title"
-           value="{{ event.title or '' }}"
-           required>
+  Purpose:
+    Display the edit event form for users.
+#}
+
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Edit Event</h1>
+    <p class="auth-subtitle">
+        Update the details below to edit your event.
+    </p> 
+
+    <form action="{{ url_for('edit_event', eid=event.eid) }}" method="POST">
+
+      <div class="form-group">
+        <label for="event-title">Title <span class="required">*</span></label>
+        <input type="text"
+              id="event-title"
+              name="title"
+              value="{{ event.title or '' }}"
+              required>
+      </div>
+
+      <div class="form-group">
+        <label for="event-date">Date <span class="required">*</span></label>
+        <input type="date"
+              id="event-date"
+              name="date"
+              value="{{ event.date.strftime('%Y-%m-%d') if event.date else '' }}"
+              required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="event-start">Start Time 
+            <span class="required">*</span>
+          </label>
+          <input type="time"
+                id="event-start"
+                name="start"
+                value="{{ event.start }}"
+                required>
+        </div>
+
+        <div class="form-group">
+          <label for="event-end">End Time 
+            <span class="required">*</span>
+          </label>
+          <input type="time"
+                id="event-end"
+                name="end"
+                value="{{ event.end }}"
+                required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="event-city">City 
+            <span class="required">*</span>
+          </label>
+          <input type="text"
+                id="event-city"
+                name="city"
+                value="{{ event.city or '' }}"
+                required>
+        </div>
+
+        <div class="form-group">
+          <label for="event-state">State 
+            <span class="required">*</span>
+          </label>
+          <input type="text"
+                id="event-state"
+                name="state"
+                value="{{ event.state or '' }}"
+                required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="event-cap">Capacity 
+          <span class="helper-text">(optional)</span>
+        </label>
+        <input type="number"
+              id="event-cap"
+              name="cap"
+              min="2"
+              value="{{ event.cap or '' }}">
+        <div class="helper-text">
+          Leave blank to use the default capacity 10.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="event-desc">Description</label>
+        <textarea id="event-desc"
+                  name="desc"
+                  rows="4"
+                  placeholder="Add event details">{{ event.desc or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="event-cid">Category <span class="required">*</span></label>
+        <select id="event-cid" name="cid" required>
+          <option value="" disabled {% if not event.cid %}selected{% endif %}>
+            Select a category
+          </option>
+          {% for c in categories %}
+            <option value="{{ c.cid }}"
+                    {% if event.cid == c.cid %}selected{% endif %}>
+              {{ c.category }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox"
+                id="event-flexible"
+                name="flexible"
+                {% if event.flexible %}checked{% endif %}>
+          Time is flexible?
+        </label>
+      </div>
+
+      <button type="submit" class="btn-submit">Update Event</button>
+
+    </form>
   </div>
+</div>
 
-  <div class="form-group">
-    <label for="event-date">Date <span class="required">*</span></label>
-    <input type="date"
-           id="event-date"
-           name="date"
-           value="{{ event.date.strftime('%Y-%m-%d') if event.date else '' }}"
-           required>
-  </div>
-
-  <div class="form-row">
-    <div class="form-group">
-      <label for="event-start">Start Time 
-        <span class="required">*</span>
-      </label>
-      <input type="time"
-             id="event-start"
-             name="start"
-             value="{{ event.start.strftime('%H:%M') if event.start else '' }}"
-             required>
-    </div>
-
-    <div class="form-group">
-      <label for="event-end">End Time 
-        <span class="required">*</span>
-      </label>
-      <input type="time"
-             id="event-end"
-             name="end"
-             value="{{ event.end.strftime('%H:%M') if event.end else '' }}"
-             required>
-    </div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-group">
-      <label for="event-city">City 
-        <span class="required">*</span>
-      </label>
-      <input type="text"
-             id="event-city"
-             name="city"
-             value="{{ event.city or '' }}"
-             required>
-    </div>
-
-    <div class="form-group">
-      <label for="event-state">State 
-        <span class="required">*</span>
-      </label>
-      <input type="text"
-             id="event-state"
-             name="state"
-             value="{{ event.state or '' }}"
-             required>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label for="event-cap">Capacity 
-      <span class="helper-text">(optional)</span>
-    </label>
-    <input type="number"
-           id="event-cap"
-           name="cap"
-           min="2"
-           value="{{ event.cap or '' }}">
-    <div class="helper-text">
-      Leave blank to use the default capacity 10.
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label for="event-desc">Description</label>
-    <textarea id="event-desc"
-              name="desc"
-              rows="4"
-              placeholder="Add event details">{{ event.desc or '' }}</textarea>
-  </div>
-
-  <div class="form-group">
-    <label for="event-cid">Category <span class="required">*</span></label>
-    <select id="event-cid" name="cid" required>
-      <option value="" disabled {% if not event.cid %}selected{% endif %}>
-        Select a category
-      </option>
-      {% for c in categories %}
-        <option value="{{ c.cid }}"
-                {% if event.cid == c.cid %}selected{% endif %}>
-          {{ c.category }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <div class="form-group checkbox-group">
-    <label>
-      <input type="checkbox"
-             id="event-flexible"
-             name="flexible"
-             {% if event.flexible %}checked{% endif %}>
-      Time is flexible
-    </label>
-  </div>
-
-  <button type="submit" class="btn-submit">Update Event</button>
-
-</form>
+{% endblock %}

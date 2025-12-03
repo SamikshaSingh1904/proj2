@@ -1531,3 +1531,36 @@ nav ul li a:hover {
 .btn-danger:hover {
     background-color: #c82333;
 }
+
+/* ========================================================================= */
+/* EDIT EVENT FORM */
+/* ========================================================================= */
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;  /* Space between checkbox and text */
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;  /* Override any width: 100% on inputs */
+    margin: 0;
+}
+
+.btn-edit {
+    background-color: #007bff;
+    color: white;
+    display: inline-block;
+    margin-top: 10px;
+    margin-right: 10px;  /* Space between edit and delete */
+}
+
+.btn-edit:hover {
+    background-color: #0056b3;
+}
