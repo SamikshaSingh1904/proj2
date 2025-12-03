@@ -713,6 +713,18 @@ def profile():
     except Exception as ex:
         flash(f'Error loading profile: {str(ex)}', 'error')
         return redirect(url_for('index'))
+    
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    '''Similar to edit_event - show form and handle updates'''
+    pass
+
+@app.route('/profile/delete', methods=['POST'])
+@login_required
+def delete_account():
+    '''Delete user account (will cascade delete their events)'''
+    pass
 
 # =======================
 # API ENDPOINTS FOR AJAX
