@@ -394,7 +394,24 @@ def edit_event(eid):
     if request.method == 'POST':
         # Handle the edit form submission, update event, and
         # redirect back to event page
-        pass
+        # Get form data
+        title = request.form.get('title')
+        desc = request.form.get('desc')
+        date = request.form.get('date')
+        start = request.form.get('start')
+        end = request.form.get('end')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        cap = request.form.get('cap')
+        flexible = request.form.get('flexible') == 'on'
+        cid = request.form.get('cid')
+        
+        # Update event in database
+        e.update_event(conn, eid, title, desc, date, start, end, 
+                       city, state, cap, flexible, cid)
+        
+        flash('Event updated successfully', 'success')
+        return redirect(url_for('view_event_forum', eid=eid))
     
     # GET request - show edit form
     return render_template('edit_event.html', event=event)
