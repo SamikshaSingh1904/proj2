@@ -55,7 +55,7 @@ def get_event_by_id(conn, eid):
     
     query = '''
         SELECT e.eid, e.title, e.start, e.end, e.date, e.desc,
-               e.city, e.state, e.cap, e.flexible, e.addedBy,
+               e.city, e.state, e.cap, e.flexible, e.addedBy, e.cid,
                p.name as creator_name, c.category
         FROM events e
         JOIN person p ON e.addedBy = p.uid

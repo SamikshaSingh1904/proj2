@@ -210,13 +210,16 @@ def create_event():
             cap=cap_str,
             cid=cid
         )
+    
+    # Get flexible checkbox value
+    flexible = request.form.get('event-flexible') == 'on'
 
     #insert event and auto-add creator 
     eid = form.insert_event(
         conn,
         title, date_str, start_str, end_str,
         desc, uid, city, state, cap, 
-        flexible=False, cid=cid
+        flexible=flexible, cid=cid
     )
 
     form.add_participant(conn, eid, uid)
@@ -486,7 +489,7 @@ def edit_event(eid):
         flash('Event updated successfully', 'success')
         return redirect(url_for('view_event_forum', eid=eid))
     
-    # GET request - show edit form
+    # GET request - show edit form  
     return render_template('edit_event.html', 
                           page_title='Edit Event',
                           event=event, 

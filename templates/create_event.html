@@ -122,6 +122,16 @@
         </select>
       </div>
 
+      <div class="form-group checkbox-group">
+        <label>
+          <span>Time is flexible?</span>
+          <input type="checkbox"
+                id="event-flexible"
+                name="event-flexible"
+                {% if flexible %}checked{% endif %}>
+        </label>
+      </div>
+
       <button type="submit" class="btn-submit">Create Event</button>
 
     </form>
