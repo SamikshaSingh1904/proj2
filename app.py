@@ -374,6 +374,31 @@ def leave_event(eid):
         flash(f'Error leaving event: {str(ex)}', 'error')
         return redirect(url_for('view_event_forum', eid=eid))
 
+@app.route('/event/<int:eid>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_event(eid):
+    """Edit an event (only for creator)"""
+    conn = get_conn()
+    
+    # Get event and check if user is the creator
+    event = e.get_event_by_id(conn, eid)
+    
+    if not event:
+        flash('Event not found', 'error')
+        return redirect(url_for('forum'))
+    
+    if event['addedBy'] != session['uid']:
+        flash('You can only edit your own events', 'error')
+        return redirect(url_for('view_event_forum', eid=eid))
+    
+    if request.method == 'POST':
+        # Handle the edit form submission, update event, and
+        # redirect back to event page
+        pass
+    
+    # GET request - show edit form
+    return render_template('edit_event.html', event=event)
+    
 @app.route('/forum/event/<int:eid>/delete', methods=['POST'])
 @login_required
 def delete_event(eid):

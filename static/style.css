@@ -352,7 +352,8 @@ nav ul li a:hover {
 }
 
 .today-indicator {
-    display: block;
+    display: inline-block;
+    vertical-align: middle;
     font-size: 0.7rem;
     color: var(--color-accent);
     font-weight: bold;
