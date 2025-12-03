@@ -39,9 +39,6 @@ def get_week_events(conn, start_date, end_date):
     curs.execute(query, (start_date, end_date))
     events = curs.fetchall()
     
-    curs.execute(query, (start_date, end_date))
-    events = curs.fetchall()
-    
     # Format times for display
     for event in events:
         event['start_formatted'] = format_time(event['start'])

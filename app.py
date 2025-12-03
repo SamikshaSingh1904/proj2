@@ -71,6 +71,8 @@ def about():
 @app.route('/calendar/')
 @app.route('/calendar/<date_str>')
 def calendar(date_str=None):
+    print("DEBUG: Calendar route called!")  # Add this
+    print(f"DEBUG: date_str = {date_str}")  # Add this
     ''' Main calendar view - PUBLIC (no login required)
     date_str format: YYYY-MM-DD 
     Renders template for the calendar!
@@ -379,6 +381,9 @@ def leave_event(eid):
 def edit_event(eid):
     """Edit an event (only for creator)"""
     conn = get_conn()
+
+    #fetch category options for the drop down 
+    categories = form.get_categories(conn)
     
     # Get event and check if user is the creator
     event = e.get_event_by_id(conn, eid)
@@ -395,26 +400,97 @@ def edit_event(eid):
         # Handle the edit form submission, update event, and
         # redirect back to event page
         # Get form data
-        title = request.form.get('title')
-        desc = request.form.get('desc')
-        date = request.form.get('date')
-        start = request.form.get('start')
-        end = request.form.get('end')
-        city = request.form.get('city')
-        state = request.form.get('state')
-        cap = request.form.get('cap')
+        title = request.form.get('title').strip()
+        desc = request.form.get('desc').strip()
+        date_str = request.form.get('date').strip()
+        start_str = request.form.get('start').strip()
+        end_str = request.form.get('end').strip()
+        city = request.form.get('city').strip()
+        state = request.form.get('state').strip()
+        cap_str = request.form.get('cap').strip()
         flexible = request.form.get('flexible') == 'on'
-        cid = request.form.get('cid')
+        cid_str = request.form.get('cid').strip()
+
+        error = False
+
+        #required field checks 
+        if not title:
+            flash("Title is required.", 'error')
+            error = True
+        if not date_str:
+            flash("Date is required.", 'error')
+            error = True
+        if not start_str:
+            flash("Start time is required.", 'error')
+            error = True
+        if not end_str:
+            flash("End time is required.", 'error')
+            error = True
+        if not city:
+            flash("City is required.", 'error')
+            error = True
+        if not state:
+            flash("State is required.", 'error')
+            error = True
+        if not cid_str:
+            flash("Category is required.", 'error')
+            error = True
+
+        #capacity handling that defaults to 10 
+        cap = None
+        if cap_str:
+            if cap_str.isnumeric():
+                cap = int(cap_str)
+                if cap < 0:
+                    flash("Capacity must be non-negative.", 'error')
+                    error = True
+            else:
+                flash("Capacity must be a non-negative integer.", 'error')
+                error = True
+        else:
+            cap = 10
+
+        #checking valid category 
+        cid = None
+        if cid_str:
+            if cid_str.isnumeric():
+                cid = int(cid_str)
+            else:
+                flash("Invalid category.", 'error')
+                error = True
+
+        #if any errors, re-render the form with previous values 
+        if error:
+            # Update event object with form data to preserve user input
+            event['title'] = title
+            event['desc'] = desc
+            event['date'] = date_str
+            event['start'] = start_str
+            event['end'] = end_str
+            event['city'] = city
+            event['state'] = state
+            event['cap'] = cap
+            event['cid'] = cid
+
+            return render_template(
+                'edit_event.html', 
+                page_title='Edit Event',
+                categories=categories,
+                event=event
+            )
         
         # Update event in database
-        e.update_event(conn, eid, title, desc, date, start, end, 
+        e.update_event(conn, eid, title, desc, date_str, start_str, end_str, 
                        city, state, cap, flexible, cid)
         
         flash('Event updated successfully', 'success')
         return redirect(url_for('view_event_forum', eid=eid))
     
     # GET request - show edit form
-    return render_template('edit_event.html', event=event)
+    return render_template('edit_event.html', 
+                          page_title='Edit Event',
+                          event=event, 
+                          categories=categories)
     
 @app.route('/forum/event/<int:eid>/delete', methods=['POST'])
 @login_required
