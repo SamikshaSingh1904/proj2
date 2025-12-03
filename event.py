@@ -93,6 +93,18 @@ def delete_event_by_id(conn, eid):
     curs.execute('DELETE FROM events WHERE eid = %s', [eid])
     conn.commit()
 
+def update_event(conn, eid, title, desc, date, start, 
+                 end, city, state, cap, flexible, cid):
+    """Update an existing event in the database"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+        UPDATE events 
+        SET title=%s, `desc`=%s, date=%s, start=%s, end=%s, 
+            city=%s, state=%s, cap=%s, flexible=%s, cid=%s
+        WHERE eid=%s
+    ''', [title, desc, date, start, end, city, state, cap, flexible, cid, eid])
+    conn.commit()
+
 def get_participant_count(conn, eid):
     """
     Get current number of participants for an event
