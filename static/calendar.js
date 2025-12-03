@@ -214,6 +214,26 @@ function openEventPanel(eventId) {
         });
 }
 
+function deleteEvent(eventId) {
+    fetch(`/api/event/${eventId}/delete`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close the panel and reload the page to update the calendar
+            closeEventPanel();
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to delete event');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting event:', error);
+        alert('Failed to delete event');
+    })
+}
+
 function closeEventPanel() {
     const panel = document.getElementById('event-panel');
     panel.classList.remove('panel-open');

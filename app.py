@@ -287,14 +287,10 @@ def view_event_forum(eid):
         return redirect(url_for('forum'))
 
 @app.route('/forum/event/<int:eid>/comment', methods=['POST'])
+@login_required
 def add_comment_to_event(eid):
     """Add a comment to an event's forum"""
-    try:
-        # Check if user is logged in
-        if 'uid' not in session:
-            flash('You must be logged in to comment', 'error')
-            return redirect(url_for('login'))
-        
+    try: 
         text = request.form.get('text')
         
         if not text or not text.strip():
@@ -322,13 +318,10 @@ def add_comment_to_event(eid):
         return redirect(url_for('view_event_forum', eid=eid))
     
 @app.route('/forum/event/<int:eid>/join', methods=['POST'])
+@login_required
 def join_event(eid):
     """Join an event"""
-    try:
-        if 'uid' not in session:
-            flash('You must be logged in to join events', 'error')
-            return redirect(url_for('login'))
-        
+    try:        
         conn = get_conn()
         
         # Check if event exists and has capacity
@@ -358,13 +351,10 @@ def join_event(eid):
         return redirect(url_for('view_event_forum', eid=eid))
     
 @app.route('/forum/event/<int:eid>/leave', methods=['POST'])
+@login_required
 def leave_event(eid):
     """Leave an event as a participant"""
     try:
-        if 'uid' not in session:
-            flash('You must be logged in', 'error')
-            return redirect(url_for('login'))
-        
         conn = get_conn()
         
         # Check if user is the event creator
@@ -384,14 +374,39 @@ def leave_event(eid):
         flash(f'Error leaving event: {str(ex)}', 'error')
         return redirect(url_for('view_event_forum', eid=eid))
 
+@app.route('/forum/event/<int:eid>/delete', methods=['POST'])
+@login_required
+def delete_event(eid):
+    """Delete an event (only for creator of event)"""
+    try:        
+        conn = get_conn()
+        
+        # Get event and check if user is the creator
+        event = e.get_event_by_id(conn, eid)
+        
+        if not event:
+            flash('Event not found', 'error')
+            return redirect(url_for('forum'))
+        
+        if event['addedBy'] != session['uid']:
+            flash('You can only delete your own events', 'error')
+            return redirect(url_for('view_event_forum', eid=event['eid']))
+        
+        # Delete event
+        e.delete_event_by_id(conn, eid)
+        
+        flash('Event deleted successfully', 'success')
+        return redirect(url_for('forum'))
+    
+    except Exception as ex:
+        flash(f'Error deleting event: {str(ex)}', 'error')
+        return redirect(url_for('forum'))
+
 @app.route('/forum/comment/<int:commId>/delete', methods=['POST'])
+@login_required
 def delete_comment(commId):
     """Delete a comment (only by creator)"""
-    try:
-        if 'uid' not in session:
-            flash('You must be logged in', 'error')
-            return redirect(url_for('login'))
-        
+    try:        
         conn = get_conn()
         
         # Get comment and check if user is the creator
@@ -448,7 +463,7 @@ def login():
                     session['name'] = user['name']
                     session['email'] = user['email']
                     flash(f'Welcome back, {user["name"]}!', 'success')
-                    return redirect(url_for('forum'))
+                    return redirect(url_for('index'))
                 else:
                     flash('Invalid email or password', 'error')
                     return redirect(url_for('login'))
@@ -541,12 +556,9 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/profile')
+@login_required
 def profile():
     """View user profile"""
-    if 'uid' not in session:
-        flash('Please log in to view your profile', 'error')
-        return redirect(url_for('login'))
-    
     try:
         conn = get_conn()
         
@@ -644,6 +656,30 @@ def get_event_details(eid):
     }
     return jsonify(response)
 
+@app.route('/api/event/<int:eid>/delete', methods=['DELETE'])
+@login_required
+def delete_event_api(eid):
+    """API endpoint to delete an event"""
+    try:        
+        conn = get_conn()
+        
+        # Get event and check if user is the creator
+        event = e.get_event_by_id(conn, eid)
+        
+        if not event:
+            return jsonify({'success': False, 'error': 'Event not found'}), 404
+        
+        if event['addedBy'] != session['uid']:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+        
+        # Delete event
+        e.delete_event_by_id(conn, eid)
+        
+        return jsonify({'success': True})
+    
+    except Exception as ex:
+        return jsonify({'success': False, 'error': str(ex)}), 500
+
 @app.route('/api/event/<int:eid>/forum')
 def get_event_forum(eid):
     """
@@ -690,15 +726,12 @@ def get_event_forum(eid):
         return jsonify({'error': str(ex)}), 500
 
 @app.route('/api/event/<int:eid>/forum/comment', methods=['POST'])
+@login_required
 def api_add_comment(eid):
     """
     API endpoint to add a comment to an event's forum
     """
-    try:
-        # Check if user is logged in
-        if 'uid' not in session:
-            return jsonify({'error': 'Must be logged in to comment'}), 401
-        
+    try:        
         data = request.get_json()
         text = data.get('text', '').strip()
         
@@ -727,14 +760,12 @@ def api_add_comment(eid):
         return jsonify({'error': str(ex)}), 500
 
 @app.route('/api/comment/<int:commId>/delete', methods=['DELETE'])
+@login_required
 def api_delete_comment(commId):
     """
     API endpoint to delete a comment
     """
     try:
-        if 'uid' not in session:
-            return jsonify({'error': 'Must be logged in'}), 401
-        
         conn = get_conn()
         
         # Get comment and check if user is the creator

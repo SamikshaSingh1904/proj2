@@ -87,6 +87,12 @@ def get_event_participants(conn, eid):
     curs.execute(query, (eid,))
     return curs.fetchall()
 
+def delete_event_by_id(conn, eid):
+    """Delete an event from the database"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('DELETE FROM events WHERE eid = %s', [eid])
+    conn.commit()
+
 def get_participant_count(conn, eid):
     """
     Get current number of participants for an event
