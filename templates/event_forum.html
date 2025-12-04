@@ -98,10 +98,12 @@
                         <button type="submit" 
                                 class="btn btn-join" 
                                 {% if event.participant_count 
-                                    >= event.cap %}
+                                    >= event.cap or event.date < today %}
                                     disabled
                                 {% endif %}>
-                            {% if event.participant_count 
+                            {% if event.date < today %}
+                                Event Passed
+                            {% elif event.participant_count 
                                 >= event.cap %}
                                 Event Full
                             {% else %}

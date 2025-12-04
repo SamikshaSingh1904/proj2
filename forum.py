@@ -145,7 +145,7 @@ def get_event_capacity_info(conn, eid):
     """Get event capacity and current participant count"""
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-        SELECT e.cap, COUNT(p.uid) as current_count
+        SELECT e.eid, e.cap, e.date, COUNT(p.uid) as current_count
         FROM events e
         LEFT JOIN participants p ON e.eid = p.eid
         WHERE e.eid = %s

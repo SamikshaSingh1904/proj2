@@ -281,11 +281,15 @@ def view_event_forum(eid):
         
         # Get comments for this forum
         comments = forum_db.get_forum_comments(conn, evt['fid'])
+
+        # Get today's date for comparison
+        today = datetime.now().date()
         
         return render_template('event_forum.html', 
                                page_title='Event Forum', 
                                event=evt, 
-                               comments=comments)
+                               comments=comments,
+                               today=today)
     
     except Exception as ex:
         flash(f'Error loading event forum: {str(ex)}', 'error')
@@ -338,6 +342,11 @@ def join_event(eid):
         
         if event['current_count'] >= event['cap']:
             flash('Event is at full capacity', 'error')
+            return redirect(url_for('view_event_forum', eid=eid))
+        
+        # Check if event date has passed
+        if event['date'] < datetime.now().date():
+            flash('Cannot join past events', 'error')
             return redirect(url_for('view_event_forum', eid=eid))
         
         # Check if already joined
@@ -843,6 +852,9 @@ def get_event_details(eid):
         # Check if user is already a participant
         is_participant = any(p['uid'] == session['uid'] for p in participants)
     
+    # Check if event has passed
+    event_has_passed = event_data['date'] < datetime.now().date()
+    
     # Format the response
     response = {
         'eid': event_data['eid'],
@@ -862,6 +874,7 @@ def get_event_details(eid):
         'logged_in': logged_in,
         'is_creator': is_creator,
         'is_participant': is_participant,
+        'event_has_passed': event_has_passed,
         'participants': [{
                 'uid': p['uid'],
                 'name': p['name'],

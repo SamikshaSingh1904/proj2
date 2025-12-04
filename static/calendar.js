@@ -175,6 +175,7 @@ function openEventPanel(eventId) {
             } else {
                 // Regular logged-in user
                 const isFull = data.current_participants >= data.cap;
+                const hasPassed = data.event_has_passed;
                 
                 if (data.is_participant) {
                     // User is already a participant - show leave button
@@ -182,6 +183,12 @@ function openEventPanel(eventId) {
                     leaveBtn.onclick = function() {
                         leaveEvent(data.eid);
                     };
+                } else if (hasPassed) {
+                    // Event has passed, show message
+                    const passedMsg = document.createElement('p');
+                    passedMsg.className = 'event-status-message';
+                    passedMsg.textContent = 'This event has passed!';
+                    eventActions.appendChild(passedMsg);
                 } else if (!isFull) { // User not participant, event not full
                     // show join button
                     joinBtn.style.display = 'inline-block';
