@@ -71,8 +71,6 @@ def about():
 @app.route('/calendar/')
 @app.route('/calendar/<date_str>')
 def calendar(date_str=None):
-    print("DEBUG: Calendar route called!")  # Add this
-    print(f"DEBUG: date_str = {date_str}")  # Add this
     ''' Main calendar view - PUBLIC (no login required)
     date_str format: YYYY-MM-DD 
     Renders template for the calendar!
@@ -740,7 +738,7 @@ def profile():
     
     except Exception as ex:
         flash(f'Error loading profile: {str(ex)}', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('forum'))
     
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
