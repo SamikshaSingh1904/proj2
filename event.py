@@ -33,9 +33,6 @@ def get_week_events(conn, start_date, end_date):
         ORDER BY e.date, e.start
     '''
 
-    print(
-        f"DEBUG event.py: Querying events between {start_date} and {end_date}"
-    )
     curs.execute(query, (start_date, end_date))
     events = curs.fetchall()
     
