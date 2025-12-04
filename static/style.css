@@ -327,7 +327,7 @@ nav ul li a:hover {
 
 .day-column {
     background-color: white;
-    min-height: 150px;
+    min-height: 60vh;
     padding: 0.5rem;
     position: relative;
 }
