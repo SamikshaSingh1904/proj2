@@ -34,6 +34,15 @@ def create_user(conn, name, email, hashed_password, bio, year, pronouns):
     # Get the auto-generated uid
     return curs.lastrowid
 
+def update_user_profile(conn, uid, name, bio, year, pronouns):
+    """Update user profile information"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+        UPDATE person 
+        SET name=%s, bio=%s, year=%s, pronouns=%s
+        WHERE uid=%s
+    ''', [name, bio, year, pronouns, uid])
+    conn.commit()
 
 def get_user_profile(conn, uid):
     """Get user profile information"""

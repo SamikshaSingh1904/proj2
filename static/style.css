@@ -1470,17 +1470,30 @@ nav ul li a:hover {
     border-style: solid;
 }
 
-.profile-actions {
-    display: flex;
-    justify-content: space-between;  /* Pushes logout to right */
-    align-items: center;
-    margin-top: 15px;
-    flex-wrap: wrap;
+.logout-btn {
+    background-color: #6c757d;
+    color: white;
+    border: 2px solid #6c757d;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
 }
 
-.profile-actions-left {
+.logout-btn:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+.profile-actions {
     display: flex;
     gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
 }
 
 .profile-btn {
@@ -1502,15 +1515,6 @@ nav ul li a:hover {
     background-color: #0056b3;
 }
 
-.logout-btn {
-    background-color: #6c757d;
-    color: white;
-}
-
-.logout-btn:hover {
-    background-color: #545b62;
-}
-
 .delete-btn {
     background-color: #dc3545;
     color: white;
@@ -1518,6 +1522,24 @@ nav ul li a:hover {
 
 .delete-btn:hover {
     background-color: #c82333;
+}
+
+.btn-cancel {
+    display: inline-block;
+    width: 100%;
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #6c757d;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.btn-cancel:hover {
+    background-color: #545b62;
 }
 
 

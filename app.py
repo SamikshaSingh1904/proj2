@@ -718,7 +718,74 @@ def profile():
 @login_required
 def edit_profile():
     '''Similar to edit_event - show form and handle updates'''
-    pass
+    conn = get_conn()
+    
+    # Get current user info
+    user = password_db.get_user_profile(conn, session['uid'])
+    
+    if not user:
+        flash('User not found', 'error')
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        # Get form data
+        name = request.form.get('name', '').strip()
+        bio = request.form.get('bio', '').strip()
+        year = request.form.get('year', '').strip()
+        pronouns = request.form.get('pronouns', '').strip()
+        
+        error = False
+        
+        # Validation
+        if not name:
+            flash('Name is required', 'error')
+            error = True
+        
+        if len(name) > 30:
+            flash('Name must be 30 characters or less', 'error')
+            error = True
+        
+        if bio and len(bio) > 100:
+            flash('Bio must be 100 characters or less', 'error')
+            error = True
+
+        if pronouns and len(pronouns) > 30:
+            flash('Pronouns must be 30 characters or less', 'error')
+            error = True
+        
+        # Convert year to int or None
+        year_int = None
+        if year:
+            if year.isnumeric():
+                year_int = int(year)
+            else:
+                flash('Year must be a number', 'error')
+                error = True
+        
+        if error:
+            # Re-render with current form data
+            user['name'] = name
+            user['bio'] = bio
+            user['year'] = year
+            user['pronouns'] = pronouns
+            return render_template('edit_profile.html',
+                                 page_title='Edit Profile',
+                                 user=user)
+        
+        # Update user profile in database
+        password_db.update_user_profile(conn, session['uid'], 
+                                       name, bio, year_int, pronouns)
+        
+        # Update session with new name
+        session['name'] = name
+        
+        flash('Profile updated successfully', 'success')
+        return redirect(url_for('profile'))
+    
+    # GET request - show edit form
+    return render_template('edit_profile.html', 
+                          page_title='Edit Profile',
+                          user=user)
 
 @app.route('/profile/delete', methods=['POST'])
 @login_required
