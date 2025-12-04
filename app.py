@@ -791,7 +791,23 @@ def edit_profile():
 @login_required
 def delete_account():
     '''Delete user account (will cascade delete their events)'''
-    pass
+    try:
+        conn = get_conn()
+        uid = session['uid']
+        name = session.get('name', 'User')
+        
+        # Delete user (CASCADE will handle events, participants, comments)
+        password_db.delete_user(conn, uid)
+        
+        # Clear session
+        session.clear()
+        
+        flash(f'Your account has been deleted. Goodbye, {name}!', 'success')
+        return redirect(url_for('index'))
+    
+    except Exception as ex:
+        flash(f'Error deleting account: {str(ex)}', 'error')
+        return redirect(url_for('profile'))
 
 # =======================
 # API ENDPOINTS FOR AJAX

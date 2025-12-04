@@ -44,6 +44,12 @@ def update_user_profile(conn, uid, name, bio, year, pronouns):
     ''', [name, bio, year, pronouns, uid])
     conn.commit()
 
+def delete_user(conn, uid):
+    """Delete a user account from the database"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('DELETE FROM person WHERE uid = %s', [uid])
+    conn.commit()
+
 def get_user_profile(conn, uid):
     """Get user profile information"""
     curs = dbi.dict_cursor(conn)
