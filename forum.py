@@ -167,13 +167,54 @@ def is_user_participant(conn, eid, uid):
 
 
 def add_participant(conn, eid, uid):
-    """Add a user as a participant to an event"""
+    """Add a user as a participant to an event
+
+    Returns:
+        True if successfully added
+        False if event is full 
+        
+    Raises:
+        Exception for other database errors
+
+    Note: Already-joined check should be done before calling this function
+          for better error messages. This function focuses on capacity check.
+    """
     curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        INSERT INTO participants (eid, uid)
-        VALUES (%s, %s)
-    ''', [eid, uid])
-    conn.commit()
+    try:
+        # Start transaction and lock the event row
+        curs.execute('START TRANSACTION')
+
+        # Lock the event and check capacity atomically
+        curs.execute('''
+            SELECT e.cap, COUNT(p.uid) as current_count
+            FROM events e
+            LEFT JOIN participants p ON e.eid = p.eid
+            WHERE e.eid = %s
+            GROUP BY e.eid, e.cap
+            FOR UPDATE
+        ''', [eid])
+
+        result = curs.fetchone()
+        if not result:
+            conn.rollback()
+            return False  # Event not found
+            
+        if result['current_count'] >= result['cap']:
+            conn.rollback()
+            return False  # Event is full
+        
+        # Add participant
+        curs.execute('''
+            INSERT INTO participants (eid, uid)
+            VALUES (%s, %s)
+        ''', [eid, uid])
+        
+        conn.commit()
+        return True
+    
+    except Exception as e:
+        conn.rollback()
+        raise
 
 
 def get_event_creator(conn, eid):

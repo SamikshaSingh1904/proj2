@@ -346,10 +346,6 @@ def join_event(eid):
             flash('Event not found', 'error')
             return redirect(url_for('forum'))
         
-        if event['current_count'] >= event['cap']:
-            flash('Event is at full capacity', 'error')
-            return redirect(url_for('view_event_forum', eid=eid))
-        
         # Check if event date has passed
         if event['date'] < datetime.now().date():
             flash('Cannot join past events', 'error')
@@ -360,10 +356,14 @@ def join_event(eid):
             flash('You have already joined this event', 'error')
             return redirect(url_for('view_event_forum', eid=eid))
         
-        # Add participant
-        forum_db.add_participant(conn, eid, session['uid'])
+        # Attempt to add participant (checks capacity atomically)
+        success = forum_db.add_participant(conn, eid, session['uid'])
         
-        flash('Successfully joined the event!', 'success')
+        if success:
+            flash('Successfully joined the event!', 'success')
+        else:
+            flash('Event is full', 'error')
+            
         return redirect(url_for('view_event_forum', eid=eid))
     
     except Exception as ex:
@@ -947,20 +947,20 @@ def api_join_event(eid):
             return jsonify({'success': False, 'error': 
                             'Cannot join past events'}), 400
         
-        if event['current_count'] >= event['cap']:
-            return jsonify({'success': False, 'error': 
-                            'Event is at full capacity'}), 400
-        
         # Check if already joined
         if forum_db.is_user_participant(conn, eid, session['uid']):
             return jsonify({'success': False, 'error': 
                             'Already joined'}), 400
         
-        # Add participant
-        forum_db.add_participant(conn, eid, session['uid'])
+        # Attempt to add participant (checks capacity atomically)
+        success = forum_db.add_participant(conn, eid, session['uid'])
         
-        return jsonify({'success': True, 'message': 
-                        'Successfully joined event'})
+        if success:
+            return jsonify({'success': True, 'message': 
+                            'Successfully joined event'})
+        else:
+            return jsonify({'success': False, 'error': 
+                            'Event is full'}), 400
     
     except Exception as ex:
         return jsonify({'success': False, 'error': str(ex)}), 500
