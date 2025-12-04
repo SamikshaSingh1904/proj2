@@ -284,12 +284,19 @@ def view_event_forum(eid):
 
         # Get today's date for comparison
         today = datetime.now().date()
+
+        # Determine back URL (where they came from)
+        referrer = request.referrer
+        # If they came from clump, use that; otherwise default to forum
+        back_url = (referrer if referrer and request.host in referrer
+                    else url_for('forum'))
         
         return render_template('event_forum.html', 
                                page_title='Event Forum', 
                                event=evt, 
                                comments=comments,
-                               today=today)
+                               today=today,
+                               back_url=back_url)
     
     except Exception as ex:
         flash(f'Error loading event forum: {str(ex)}', 'error')
