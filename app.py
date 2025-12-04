@@ -671,14 +671,18 @@ def signup():
             return redirect(url_for('index'))
         
         except Exception as ex:
-            # Handles duplicate email and other database errors
-            error_msg = str(ex).lower()
-            is_duplicate = ('duplicate entry' in error_msg or 
-                    'unique constraint' in error_msg)
-            if is_duplicate:
+            # MySQL duplicate entry error code
+            is_mysql_duplicate = (
+                hasattr(ex, 'args') 
+                and len(ex.args) > 0 
+                and ex.args[0] == 1062
+            )
+
+            if is_mysql_duplicate:
                 flash('An account with this email already exists', 'error')
             else:
                 flash(f'Signup error: {str(ex)}', 'error')
+
             return redirect(url_for('signup'))
     
     # GET request - show signup form
