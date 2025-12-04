@@ -653,17 +653,13 @@ def signup():
         try:
             conn = get_conn()
             
-            # Check if email already exists
-            if password_db.email_exists(conn, email):
-                flash('An account with this email already exists', 'error')
-                return redirect(url_for('signup'))
-            
             # Hash password with bcrypt
             password_bytes = password.encode('utf-8')
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password_bytes, salt)
             
-            # Insert new user and get the auto-generated uid
+            # Insert new user - raises exception if email exists (thread-safe)
+            # Exception caught per create_user() in password.py
             new_uid = password_db.create_user(conn, name, email, 
                                               hashed_password, 
                                              bio, year, pronouns)
@@ -674,10 +670,17 @@ def signup():
             session['email'] = email
             
             flash(f'Welcome to clump, {name}!', 'success')
-            return redirect(url_for('forum'))
+            return redirect(url_for('index'))
         
         except Exception as ex:
-            flash(f'Signup error: {str(ex)}', 'error')
+            # Handles duplicate email and other database errors
+            error_msg = str(ex).lower()
+            is_duplicate = ('duplicate entry' in error_msg or 
+                    'unique constraint' in error_msg)
+            if is_duplicate:
+                flash('An account with this email already exists', 'error')
+            else:
+                flash(f'Signup error: {str(ex)}', 'error')
             return redirect(url_for('signup'))
     
     # GET request - show signup form

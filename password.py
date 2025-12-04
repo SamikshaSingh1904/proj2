@@ -24,15 +24,29 @@ def email_exists(conn, email):
 
 
 def create_user(conn, name, email, hashed_password, bio, year, pronouns):
-    """Insert a new user into the database and return the new uid"""
+    """Insert a new user into the database and return the new uid
+
+    Raises:
+        Exception: If email already exists (duplicate key error).
+                   Caller should handle this with try/except.
+                   Currently caught in app.py > signup() route.
+    
+    Note: Uses database UNIQUE constraint for thread-safe duplicate detection.
+          Checking email_exists() before insert would have a race condition.
+    """
     curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        INSERT INTO person (name, email, pass, bio, year, pronouns)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    ''', [name, email, hashed_password, bio, year, pronouns])
-    conn.commit()
-    # Get the auto-generated uid
-    return curs.lastrowid
+    try:
+        curs.execute('''
+            INSERT INTO person (name, email, pass, bio, year, pronouns)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        ''', [name, email, hashed_password, bio, year, pronouns])
+        conn.commit()
+        # Get the auto-generated uid
+        return curs.lastrowid
+    except Exception as e:
+        # Duplicate email will raise an exception due to UNIQUE constraint
+        # Let it bubble up to caller (app.py > signup route)
+        raise
 
 def update_user_profile(conn, uid, name, bio, year, pronouns):
     """Update user profile information"""
