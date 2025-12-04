@@ -908,6 +908,65 @@ def delete_event_api(eid):
     
     except Exception as ex:
         return jsonify({'success': False, 'error': str(ex)}), 500
+    
+@app.route('/api/event/<int:eid>/join', methods=['POST'])
+@login_required
+def api_join_event(eid):
+    """API endpoint to join an event"""
+    try:        
+        conn = get_conn()
+        
+        # Check if event exists and has capacity
+        event = forum_db.get_event_capacity_info(conn, eid)
+        
+        if not event:
+            return jsonify({'success': False, 'error': 
+                            'Event not found'}), 404
+        
+        # Check if event date has passed
+        if event['date'] < datetime.now().date():
+            return jsonify({'success': False, 'error': 
+                            'Cannot join past events'}), 400
+        
+        if event['current_count'] >= event['cap']:
+            return jsonify({'success': False, 'error': 
+                            'Event is at full capacity'}), 400
+        
+        # Check if already joined
+        if forum_db.is_user_participant(conn, eid, session['uid']):
+            return jsonify({'success': False, 'error': 
+                            'Already joined'}), 400
+        
+        # Add participant
+        forum_db.add_participant(conn, eid, session['uid'])
+        
+        return jsonify({'success': True, 'message': 
+                        'Successfully joined event'})
+    
+    except Exception as ex:
+        return jsonify({'success': False, 'error': str(ex)}), 500
+
+@app.route('/api/event/<int:eid>/leave', methods=['POST'])
+@login_required
+def api_leave_event(eid):
+    """API endpoint to leave an event"""
+    try:
+        conn = get_conn()
+        
+        # Check if user is the event creator
+        creator_uid = forum_db.get_event_creator(conn, eid)
+        
+        if creator_uid and creator_uid == session['uid']:
+            return jsonify({'success': False, 'error': 
+                            'You  cannot leave your own event'}), 403
+        
+        # Remove participant
+        forum_db.remove_participant(conn, eid, session['uid'])
+        
+        return jsonify({'success': True, 'message': 'Successfully left event'})
+    
+    except Exception as ex:
+        return jsonify({'success': False, 'error': str(ex)}), 500
 
 @app.route('/api/event/<int:eid>/forum')
 def get_event_forum(eid):

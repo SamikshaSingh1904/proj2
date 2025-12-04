@@ -241,6 +241,51 @@ function deleteEvent(eventId) {
     })
 }
 
+function joinEvent(eventId) {
+    fetch(`/api/event/${eventId}/join`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the event panel to show updated participant list
+            openEventPanel(eventId);
+            // Optionally reload the calendar to show you're now a participant
+            // window.location.reload();
+        } else {
+            alert(data.error || 'Failed to join event');
+        }
+    })
+    .catch(error => {
+        console.error('Error joining event:', error);
+        alert('Failed to join event');
+    });
+}
+
+// Leave an event
+function leaveEvent(eventId) {
+    if (confirm('Are you sure you want to leave this event?')) {
+        fetch(`/api/event/${eventId}/leave`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the event panel to show updated participant list
+                openEventPanel(eventId);
+                // Optionally reload the calendar
+                // window.location.reload();
+            } else {
+                alert(data.error || 'Failed to leave event');
+            }
+        })
+        .catch(error => {
+            console.error('Error leaving event:', error);
+            alert('Failed to leave event');
+        });
+    }
+}
+
 function closeEventPanel() {
     const panel = document.getElementById('event-panel');
     panel.classList.remove('panel-open');
