@@ -322,9 +322,8 @@ def add_comment_to_event(eid):
             flash('Forum not found', 'error')
             return redirect(url_for('forum'))
         
-        # Get the next comment ID and insert the comment
-        next_id = forum_db.get_next_comment_id(conn)
-        forum_db.insert_comment(conn, next_id, text, session['uid'], fid)
+        # Insert the comment - database handles the ID
+        forum_db.insert_comment(conn, text, session['uid'], fid)
         
         flash('Comment added!', 'success')
         return redirect(url_for('view_event_forum', eid=eid))
@@ -1052,13 +1051,12 @@ def api_add_comment(eid):
             return jsonify({'error': 'Forum not found'}), 404
         
         # Get the next comment ID and insert the comment
-        next_id = forum_db.get_next_comment_id(conn)
-        forum_db.insert_comment(conn, next_id, text, session['uid'], fid)
+        new_commId = forum_db.insert_comment(conn, text, session['uid'], fid)
         
         return jsonify({
             'success': True,
             'message': 'Comment added successfully',
-            'commId': next_id
+            'commId': new_commId
         })
     
     except Exception as ex:

@@ -104,22 +104,24 @@ def get_forum_id_by_event(conn, eid):
     return result['fid'] if result else None
 
 
-def get_next_comment_id(conn):
-    """Get the next available comment ID"""
-    curs = dbi.dict_cursor(conn)
-    curs.execute('SELECT MAX(commId) as max_id FROM comments')
-    result = curs.fetchone()
-    return (result['max_id'] or 0) + 1
+# def get_next_comment_id(conn):
+#     """Get the next available comment ID"""
+#     curs = dbi.dict_cursor(conn)
+#     curs.execute('SELECT MAX(commId) as max_id FROM comments')
+#     result = curs.fetchone()
+#     return (result['max_id'] or 0) + 1
 
 
-def insert_comment(conn, comm_id, text, uid, fid):
-    """Insert a new comment into the database"""
+def insert_comment(conn, text, uid, fid):
+    """Insert a new comment into the database
+    and return the auto-generated commId"""
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-        INSERT INTO comments (commId, text, addedBy, fid, postedAt)
-        VALUES (%s, %s, %s, %s, NOW())
-    ''', [comm_id, text, uid, fid])
+        INSERT INTO comments (text, addedBy, fid, postedAt)
+        VALUES (%s, %s, %s, NOW())
+    ''', [text, uid, fid])
     conn.commit()
+    return curs.lastrowid
 
 
 def get_comment_info(conn, comm_id):
