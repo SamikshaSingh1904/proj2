@@ -691,17 +691,25 @@ def profile():
     """View user profile"""
     try:
         conn = get_conn()
+
+        # Get show_past parameter (default False)
+        show_past_created = request.args.get('show_past_created', 
+                                             'false').lower() == 'true'
+        show_past_joined = request.args.get('show_past_joined', 
+                                            'false').lower() == 'true'
         
         # Get user info
         user = password_db.get_user_profile(conn, session['uid'])
         
         # Get user's events (as creator)
         created_events = password_db.get_user_created_events(conn, 
-                                                             session['uid'])
+                                                             session['uid'],
+                                                             show_past_created)
         
         # Get events user is participating in
         joined_events = password_db.get_user_joined_events(conn, 
-                                                           session['uid'])
+                                                           session['uid'],
+                                                           show_past_joined)
 
         # Format times for created events
         for evt in created_events:
@@ -717,7 +725,9 @@ def profile():
                              page_title='Profile',
                              user=user,
                              created_events=created_events,
-                             joined_events=joined_events)
+                             joined_events=joined_events,
+                             show_past_created=show_past_created,
+                             show_past_joined=show_past_joined)
     
     except Exception as ex:
         flash(f'Error loading profile: {str(ex)}', 'error')

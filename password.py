@@ -61,33 +61,67 @@ def get_user_profile(conn, uid):
     return curs.fetchone()
 
 
-def get_user_created_events(conn, uid):
+def get_user_created_events(conn, uid, show_past=False):
     """Get events created by a user"""
     curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        SELECT e.eid, e.title, e.date, e.start, c.category,
-               COUNT(p.uid) as participant_count
-        FROM events e
-        JOIN calendar c ON e.cid = c.cid
-        LEFT JOIN participants p ON e.eid = p.eid
-        WHERE e.addedBy = %s
-        GROUP BY e.eid
-        ORDER BY e.date DESC
-    ''', [uid])
+    if show_past:
+        # Show all events
+        query = '''
+            SELECT e.eid, e.title, e.date, e.start,e.end, c.category,
+                COUNT(p.uid) as participant_count
+            FROM events e
+            JOIN calendar c ON e.cid = c.cid
+            LEFT JOIN participants p ON e.eid = p.eid
+            WHERE e.addedBy = %s
+            GROUP BY e.eid
+            ORDER BY e.date DESC
+        '''
+    else:
+        # Show only upcoming events
+        query = '''
+            SELECT e.eid, e.title, e.date, e.start, e.end, c.category,
+                   COUNT(p.uid) as participant_count
+            FROM events e
+            JOIN calendar c ON e.cid = c.cid
+            LEFT JOIN participants p ON e.eid = p.eid
+            WHERE e.addedBy = %s AND e.date >= CURDATE()
+            GROUP BY e.eid
+            ORDER BY e.date, e.start
+        '''
+    curs.execute(query, [uid])
     return curs.fetchall()
 
 
-def get_user_joined_events(conn, uid):
-    """Get events a user is participating in"""
+def get_user_joined_events(conn, uid, show_past=False):
+    """Get events a user is participating in,
+    excluding their own (visible in created events!)"""
     curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        SELECT e.eid, e.title, e.date, e.start, c.category,
-               p2.name as creator_name
-        FROM participants part
-        JOIN events e ON part.eid = e.eid
-        JOIN calendar c ON e.cid = c.cid
-        JOIN person p2 ON e.addedBy = p2.uid
-        WHERE part.uid = %s
-        ORDER BY e.date DESC
-    ''', [uid])
+
+    if show_past:
+        # Show all events
+        query = '''
+            SELECT e.eid, e.title, e.date, e.start, c.category,
+                p2.name as creator_name
+            FROM participants part
+            JOIN events e ON part.eid = e.eid
+            JOIN calendar c ON e.cid = c.cid
+            JOIN person p2 ON e.addedBy = p2.uid
+            WHERE part.uid = %s AND e.addedBy != %s
+            ORDER BY e.date DESC
+        '''
+        curs.execute(query, [uid, uid])
+    else: 
+        # Show only upcoming events
+        query = '''
+            SELECT e.eid, e.title, e.date, e.start, e.end, c.category,
+                   p2.name as creator_name
+            FROM participants pa
+            JOIN events e ON pa.eid = e.eid
+            JOIN calendar c ON e.cid = c.cid
+            JOIN person p2 ON e.addedBy = p2.uid
+            WHERE pa.uid = %s AND e.addedBy != %s AND e.date >= CURDATE()
+            ORDER BY e.date, e.start
+        '''
+        curs.execute(query, [uid, uid])
+
     return curs.fetchall()
