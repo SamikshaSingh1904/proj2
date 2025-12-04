@@ -1,6 +1,6 @@
 /*
   calendar.js
-  Authors: clump (all members)
+  Authors: Beatrix Kim, Bessie Li, Samiksha Singh
 
   Purpose:
     Displays events on a weekly calendar grid and allows users to

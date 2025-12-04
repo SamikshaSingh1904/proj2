@@ -1,6 +1,6 @@
 """
 forum.py - Database query functions for forum functionality
-authors: clump
+authors: Samiksha Singh
 """
 import cs304dbi as dbi
 
@@ -53,7 +53,9 @@ def get_comment_count(conn, fid):
 
 
 def get_event_details(conn, eid):
-    """Get detailed information about a specific event"""
+    """Get information about a specific event to be
+    displayed on an event's individual page (as opposed
+    to the calendar view's event side panel)"""
     curs = dbi.dict_cursor(conn)
     curs.execute('''
         SELECT e.eid, e.title, e.desc, e.date, e.start, e.end,

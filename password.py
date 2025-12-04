@@ -1,6 +1,6 @@
 """
 password.py - Database query functions for authentication
-authors: clump 
+authors: Beatrix Kim, Bessie Li, Samiksha Singh 
 """
 import cs304dbi as dbi
 

@@ -1,8 +1,9 @@
 """
 test_clump.py - Testing script for clump application
-Authors: clump
 
-Usage: python3 test_clump.py
+Used GenAI to create this testing script
+
+Usage: python test_clump.py
 """
 
 import requests

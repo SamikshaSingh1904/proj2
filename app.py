@@ -1,6 +1,6 @@
 """
 clump: Flask web app for Wellesley students to clump together and plan events.
-Authors: clump 
+Authors: Beatrix Kim, Bessie Li, Samiksha Singh 
 
 Features:
 - Weekly calendar of events (public)

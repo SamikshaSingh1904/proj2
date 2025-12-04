@@ -1,6 +1,6 @@
 /*
   flash.js
-  Authors: Beatrix
+  Authors: Beatrix Kim
 
   Purpose:
     Auto-hide flash messages after 2 seconds

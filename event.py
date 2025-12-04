@@ -1,6 +1,6 @@
 """
 event.py - Database functions for event operations
-authors: clump
+authors: Beatrix Kim, Bessie Li, Samiksha Singh
 """
 import cs304dbi as dbi
 

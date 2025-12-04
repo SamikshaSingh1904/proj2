@@ -1,6 +1,6 @@
 /*
   profile.js
-  Authors: clump
+  Authors: Beatrix Kim, Bessie Li, Samiksha Singh
 
   Purpose:
     Makes event cards on the profile page clickable so users can

@@ -1,6 +1,6 @@
 """
 form.py - Database functions for create event form operations
-authors: clump
+authors: Bessie Li
 """
 import cs304dbi as dbi
 
