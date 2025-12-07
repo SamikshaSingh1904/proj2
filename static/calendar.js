@@ -33,8 +33,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const newDate = `${year}-${month}-${day}`;
+
+            // Preserve category filter
+            const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
+            const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
             
-            window.location.href = `/calendar/${newDate}`;
+            window.location.href = `/calendar/${newDate}${categoryParam}`;
         }
     });
 
@@ -51,14 +55,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const newDate = `${year}-${month}-${day}`;
+
+            // Preserve category filter
+            const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
+            const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
             
-            window.location.href = `/calendar/${newDate}`;
+            window.location.href = `/calendar/${newDate}${categoryParam}`;
         }
     });
 
     // Today button - go back to current week
     document.getElementById('today-btn').addEventListener('click', function() {
-        window.location.href = '/calendar/';
+        // Preserve category filter
+        const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
+        const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
+
+        window.location.href = `/calendar/${categoryParam}`;
     });
 
     // Add click handlers to event blocks
@@ -101,6 +113,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     // ========== END: CATEGORY FILTER FUNCTIONALITY ==========
+
+    // Restore category filter from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryFromUrl = urlParams.get('category');
+
+    if (categoryFromUrl) {
+        // Find and click the matching filter button
+        const matchingButton = document.querySelector(`.filter-toggle[data-category="${categoryFromUrl}"]`);
+        if (matchingButton) {
+            matchingButton.click();
+        }
+    }
 });
 
 
@@ -357,23 +381,6 @@ function loadForumComments(eventId, loggedIn) {
                 commentFormContainer.style.display = 'none';
                 forumLoginPrompt.style.display = 'block';
             }
-            
-            // // Display comments
-            // if (data.comments && data.comments.length > 0) {
-            //     commentsContainer.innerHTML = '';
-            //     data.comments.forEach(comment => {
-            //         const commentDiv = 
-            //             createCommentElement(comment, data.current_uid);
-            //         commentsContainer.appendChild(commentDiv);
-            //     });
-            // } else {
-            //     commentsContainer.innerHTML = '';
-            //     const placeholder = document.createElement('p');
-            //     placeholder.className = 'placeholder-text';
-            //     placeholder.textContent = 
-            //         'No comments yet. Be the first to share your thoughts!';
-            //     commentsContainer.appendChild(placeholder);
-            // }
 
             // Display comments (threaded: parents + replies)
             if (data.comments && data.comments.length > 0) {
@@ -422,51 +429,6 @@ function loadForumComments(eventId, loggedIn) {
             commentsContainer.appendChild(errorMsg);
         });
 }
-
-// Create a comment element
-// function createCommentElement(comment, currentUid) {
-//     const commentDiv = document.createElement('div');
-//     commentDiv.className = 'forum-comment';
-    
-//     // Comment header
-//     const headerDiv = document.createElement('div');
-//     headerDiv.className = 'forum-comment-header';
-    
-//     const authorSpan = document.createElement('span');
-//     authorSpan.className = 'forum-comment-author';
-//     authorSpan.textContent = comment.author_name;
-    
-//     const timeSpan = document.createElement('span');
-//     timeSpan.className = 'forum-comment-time';
-//     timeSpan.textContent = formatCommentTime(comment.postedAt);
-    
-//     headerDiv.appendChild(authorSpan);
-//     headerDiv.appendChild(timeSpan);
-    
-//     // Comment text
-//     const textP = document.createElement('p');
-//     textP.className = 'forum-comment-text';
-//     textP.textContent = comment.text;
-    
-//     commentDiv.appendChild(headerDiv);
-//     commentDiv.appendChild(textP);
-    
-//     // Add delete button if user owns the comment
-//     if (currentUid && comment.author_uid === currentUid) {
-//         const deleteBtn = document.createElement('button');
-//         deleteBtn.textContent = 'Delete';
-//         deleteBtn.className = 'action-btn delete-btn';
-//         deleteBtn.onclick = function() {
-//             if (confirm(
-//                 'Are you sure you want to delete this comment?')) {
-//                     deleteComment(comment.commId);
-//             }
-//         };
-//         commentDiv.appendChild(deleteBtn);
-//     }
-    
-//     return commentDiv;
-// }
 
 // Create a comment element (with nested replies)
 function createCommentElement(comment, currentUid, loggedIn, eventId, childrenByParent) {
