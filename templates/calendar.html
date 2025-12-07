@@ -35,6 +35,18 @@
                 </div>
             </div>
 
+
+            <!-- ========== START: CATEGORY FILTER BUTTONS ========== -->
+            <div class="category-filters">
+                <button class="filter-toggle active" data-category="all">All Events</button>
+                <button class="filter-toggle" data-category="Carpooling">🚗 Carpooling</button>
+                <button class="filter-toggle" data-category="Hobby & Fitness">🏋️ Hobby & Fitness</button>
+                <button class="filter-toggle" data-category="Help & Support">🌱 Help & Support</button>
+                <button class="filter-toggle" data-category="Study Groups">📚 Study Groups</button>
+                <button class="filter-toggle" data-category="Social Events">🎉 Social Events</button>
+            </div>
+            <!-- ========== END: CATEGORY FILTER BUTTONS ========== -->
+
             <div class="calendar-grid">
                 <div class="day-header">Sunday</div>
                 <div class="day-header">Monday</div>
@@ -63,7 +75,8 @@
                             {% if event.date.strftime('%Y-%m-%d') 
                             == current_date.strftime('%Y-%m-%d') %}
                             <div class="event-block" 
-                                data-eid="{{ event.eid }}">
+                                data-eid="{{ event.eid }}"
+                                data-category="{{ event.category }}">
                                 <div class="event-time">
                                     {{ event.start_formatted }}
                                 </div>

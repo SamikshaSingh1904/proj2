@@ -69,12 +69,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+
+
     // Add click handler to close button
     const closeBtn = document.querySelector('.close-panel-btn');
     if (closeBtn) {
         closeBtn.addEventListener('click', closeEventPanel);
     }
+    // ========== START: CATEGORY FILTER FUNCTIONALITY ==========
+    // Add event listeners to category filter buttons
+    document.querySelectorAll('.filter-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            
+            // Update active button
+            document.querySelectorAll('.filter-toggle').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Filter events
+            const allEvents = document.querySelectorAll('.event-block');
+            allEvents.forEach(event => {
+                const eventCategory = event.getAttribute('data-category');
+                if (category === 'all' || eventCategory === category) {
+                    event.style.display = 'block';
+                } else {
+                    event.style.display = 'none';
+                }
+            });
+        });
+    });
+    // ========== END: CATEGORY FILTER FUNCTIONALITY ==========
 });
+
+
+
+
+
 
 function loadWeek(offset) {
     window.location.href = `/calendar/?offset=${offset}`;

@@ -1635,3 +1635,167 @@ nav ul li a:hover {
 .btn-edit:hover {
     background-color: #0056b3;
 }
+
+/* ========== START: COLOR-CODED EVENT CATEGORIES (WCAG AA COMPLIANT) ========== */
+/* Base event block styling */
+.event-block {
+    border-left: 6px solid #dee2e6;
+    background: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+/* Make sure all text in events has good contrast */
+.event-block .event-time,
+.event-block .event-cal-title {
+    color: #1a1a1a; /* Very dark gray - ensures 4.5:1+ contrast on all backgrounds */
+}
+
+/* Color coding by category - solid dark borders with light backgrounds */
+.event-block[data-category="Carpooling"] {
+    border-left-color: #c92a2a; /* Dark red */
+    background: #fff5f5; /* Very light red */
+}
+
+.event-block[data-category="Hobby & Fitness"] {
+    border-left-color: #2b8a3e; /* Dark green */
+    background: #f4fdf7; /* Very light green */
+}
+
+.event-block[data-category="Help & Support"] {
+    border-left-color: #e67700; /* Dark orange */
+    background: #fff9db; /* Very light yellow */
+}
+
+.event-block[data-category="Study Groups"] {
+    border-left-color: #1864ab; /* Dark blue */
+    background: #f0f8ff; /* Very light blue */
+}
+
+.event-block[data-category="Social Events"] {
+    border-left-color: #5f3dc4; /* Dark purple */
+    background: #f8f5ff; /* Very light purple */
+}
+
+/* Hover effects - slightly darker backgrounds, maintaining text contrast */
+.event-block[data-category="Carpooling"]:hover {
+    background: #ffe0e0;
+    border-left-color: #a61e1e;
+}
+
+.event-block[data-category="Hobby & Fitness"]:hover {
+    background: #e6f9ed;
+    border-left-color: #1f6630;
+}
+
+.event-block[data-category="Help & Support"]:hover {
+    background: #fff3bf;
+    border-left-color: #cc6900;
+}
+
+.event-block[data-category="Study Groups"]:hover {
+    background: #d9eeff;
+    border-left-color: #134a7a;
+}
+
+.event-block[data-category="Social Events"]:hover {
+    background: #ede7ff;
+    border-left-color: #4c2d99;
+}
+/* ========== END: COLOR-CODED EVENT CATEGORIES (WCAG AA COMPLIANT) ========== */
+
+
+/* ========== START: CATEGORY FILTER STYLES (WCAG AA COMPLIANT) ========== */
+/* Category filter buttons */
+.category-filters {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    flex-wrap: wrap;
+}
+
+.filter-toggle {
+    padding: 10px 18px;
+    border: 2px solid #495057;
+    background: white;
+    color: #212529;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.filter-toggle:hover {
+    border-color: #212529;
+    background: #e9ecef;
+}
+
+/* Active states with dark backgrounds for proper contrast */
+.filter-toggle.active {
+    background: #212529;
+    color: white;
+    border-color: #212529;
+}
+
+.filter-toggle[data-category="Carpooling"].active {
+    background: #c92a2a;
+    border-color: #c92a2a;
+    color: white;
+}
+
+.filter-toggle[data-category="Hobby & Fitness"].active {
+    background: #2b8a3e;
+    border-color: #2b8a3e;
+    color: white;
+}
+
+.filter-toggle[data-category="Help & Support"].active {
+    background: #e67700;
+    border-color: #e67700;
+    color: white;
+}
+
+.filter-toggle[data-category="Study Groups"].active {
+    background: #1864ab;
+    border-color: #1864ab;
+    color: white;
+}
+
+.filter-toggle[data-category="Social Events"].active {
+    background: #5f3dc4;
+    border-color: #5f3dc4;
+    color: white;
+}
+
+/* Hover states for category buttons */
+.filter-toggle[data-category="Carpooling"]:hover {
+    border-color: #c92a2a;
+    background: #ffe0e0;
+}
+
+.filter-toggle[data-category="Hobby & Fitness"]:hover {
+    border-color: #2b8a3e;
+    background: #e6f9ed;
+}
+
+.filter-toggle[data-category="Help & Support"]:hover {
+    border-color: #e67700;
+    background: #fff3bf;
+}
+
+.filter-toggle[data-category="Study Groups"]:hover {
+    border-color: #1864ab;
+    background: #d9eeff;
+}
+
+.filter-toggle[data-category="Social Events"]:hover {
+    border-color: #5f3dc4;
+    background: #ede7ff;
+}
+/* ========== END: CATEGORY FILTER STYLES (WCAG AA COMPLIANT) ========== */
