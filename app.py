@@ -1016,7 +1016,8 @@ def get_event_forum(eid):
                 'author_name': comment['author_name'],
                 'author_uid': comment['author_uid'],
                 'postedAt': (comment['postedAt'].isoformat() 
-                             if comment['postedAt'] else None)
+                             if comment['postedAt'] else None),
+                'parent_commId': comment.get('parent_commId')
             })
         
         # Check if user is logged in
@@ -1066,6 +1067,88 @@ def api_add_comment(eid):
     
     except Exception as ex:
         return jsonify({'error': str(ex)}), 500
+
+
+@app.route('/api/comment/<int:commId>/reply', methods=['POST'])
+@login_required
+def api_reply_to_comment(commId):
+    """
+    API endpoint to add a reply to a comment
+    """
+    try:
+        conn = get_conn()
+
+        # Find which event this comment belongs to
+        comment = forum_db.get_comment_info(conn, commId)
+        if not comment:
+            return jsonify({'error': 'Comment not found'}), 404
+
+        eid = comment['eid']
+        data = request.get_json() or {}
+        text = data.get('text', '').strip()
+
+        if not text:
+            return jsonify({'error': 'Reply cannot be empty'}), 400
+
+        # Get forum id for this event
+        fid = forum_db.get_forum_id_by_event(conn, eid)
+        if not fid:
+            return jsonify({'error': 'Forum not found'}), 404
+
+        new_commId = forum_db.insert_reply(
+            conn, text, session['uid'], fid, commId
+        )
+
+        return jsonify({
+            'success': True,
+            'message': 'Reply added successfully',
+            'commId': new_commId,
+            'parent_commId': commId
+        })
+
+    except Exception as ex:
+        return jsonify({'error': str(ex)}), 500
+
+@app.route('/forum/comment/<int:commId>/reply', methods=['POST'])
+@login_required
+def reply_to_comment(commId):
+    """Reply to an existing comment (event forum page, HTML form)"""
+    try:
+        conn = get_conn()
+
+        # Find the event this comment belongs to
+        comment = forum_db.get_comment_info(conn, commId)
+        if not comment:
+            flash('Comment not found', 'error')
+            return redirect(url_for('forum'))
+
+        eid = comment['eid']
+        text = request.form.get('text', '').strip()
+
+        if not text:
+            flash('Reply cannot be empty', 'error')
+            return redirect(url_for('view_event_forum', eid=eid))
+
+        # Get forum ID
+        fid = forum_db.get_forum_id_by_event(conn, eid)
+        if not fid:
+            flash('Forum not found', 'error')
+            return redirect(url_for('forum'))
+
+        # Insert reply using the same helper you made in forum.py
+        forum_db.insert_reply(conn, text, session['uid'], fid, commId)
+
+        flash('Reply added!', 'success')
+        return redirect(url_for('view_event_forum', eid=eid))
+
+    except Exception as ex:
+        flash(f'Error adding reply: {str(ex)}', 'error')
+        try:
+            eid = comment['eid']
+            return redirect(url_for('view_event_forum', eid=eid))
+        except Exception:
+            return redirect(url_for('forum'))
+
 
 @app.route('/api/comment/<int:commId>/delete', methods=['DELETE'])
 @login_required

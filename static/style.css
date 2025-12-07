@@ -989,6 +989,13 @@ nav ul li a:hover {
     color: var(--color-header);
 }
 
+.comment-reply {
+    margin-left: 1.5rem;
+    border-left: 2px solid #ddd;
+    padding-left: 0.75rem;
+    margin-top: 0.5rem;
+}
+
 .comment-form textarea {
     width: 100%;
     padding: 12px;

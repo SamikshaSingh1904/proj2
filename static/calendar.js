@@ -326,22 +326,58 @@ function loadForumComments(eventId, loggedIn) {
                 forumLoginPrompt.style.display = 'block';
             }
             
-            // Display comments
+            // // Display comments
+            // if (data.comments && data.comments.length > 0) {
+            //     commentsContainer.innerHTML = '';
+            //     data.comments.forEach(comment => {
+            //         const commentDiv = 
+            //             createCommentElement(comment, data.current_uid);
+            //         commentsContainer.appendChild(commentDiv);
+            //     });
+            // } else {
+            //     commentsContainer.innerHTML = '';
+            //     const placeholder = document.createElement('p');
+            //     placeholder.className = 'placeholder-text';
+            //     placeholder.textContent = 
+            //         'No comments yet. Be the first to share your thoughts!';
+            //     commentsContainer.appendChild(placeholder);
+            // }
+
+            // Display comments (threaded: parents + replies)
             if (data.comments && data.comments.length > 0) {
                 commentsContainer.innerHTML = '';
+
+                // Build parent → children map
+                const childrenByParent = {};
                 data.comments.forEach(comment => {
-                    const commentDiv = 
-                        createCommentElement(comment, data.current_uid);
+                    const parent = comment.parent_commId || null;
+                    if (!childrenByParent[parent]) {
+                        childrenByParent[parent] = [];
+                    }
+                    childrenByParent[parent].push(comment);
+                });
+
+                // Render top-level comments (parent_commId = null)
+                const topLevel = childrenByParent[null] || [];
+                topLevel.forEach(comment => {
+                    const commentDiv = createCommentElement(
+                        comment,
+                        data.current_uid,
+                        loggedIn,
+                        eventId,
+                        childrenByParent
+                    );
                     commentsContainer.appendChild(commentDiv);
                 });
             } else {
                 commentsContainer.innerHTML = '';
                 const placeholder = document.createElement('p');
                 placeholder.className = 'placeholder-text';
-                placeholder.textContent = 
+                placeholder.textContent =
                     'No comments yet. Be the first to share your thoughts!';
                 commentsContainer.appendChild(placeholder);
             }
+
         })
         .catch(error => {
             console.error('Error loading forum comments:', error);
@@ -356,48 +392,188 @@ function loadForumComments(eventId, loggedIn) {
 }
 
 // Create a comment element
-function createCommentElement(comment, currentUid) {
+// function createCommentElement(comment, currentUid) {
+//     const commentDiv = document.createElement('div');
+//     commentDiv.className = 'forum-comment';
+    
+//     // Comment header
+//     const headerDiv = document.createElement('div');
+//     headerDiv.className = 'forum-comment-header';
+    
+//     const authorSpan = document.createElement('span');
+//     authorSpan.className = 'forum-comment-author';
+//     authorSpan.textContent = comment.author_name;
+    
+//     const timeSpan = document.createElement('span');
+//     timeSpan.className = 'forum-comment-time';
+//     timeSpan.textContent = formatCommentTime(comment.postedAt);
+    
+//     headerDiv.appendChild(authorSpan);
+//     headerDiv.appendChild(timeSpan);
+    
+//     // Comment text
+//     const textP = document.createElement('p');
+//     textP.className = 'forum-comment-text';
+//     textP.textContent = comment.text;
+    
+//     commentDiv.appendChild(headerDiv);
+//     commentDiv.appendChild(textP);
+    
+//     // Add delete button if user owns the comment
+//     if (currentUid && comment.author_uid === currentUid) {
+//         const deleteBtn = document.createElement('button');
+//         deleteBtn.textContent = 'Delete';
+//         deleteBtn.className = 'action-btn delete-btn';
+//         deleteBtn.onclick = function() {
+//             if (confirm(
+//                 'Are you sure you want to delete this comment?')) {
+//                     deleteComment(comment.commId);
+//             }
+//         };
+//         commentDiv.appendChild(deleteBtn);
+//     }
+    
+//     return commentDiv;
+// }
+
+// Create a comment element (with nested replies)
+function createCommentElement(comment, currentUid, loggedIn, eventId, childrenByParent) {
     const commentDiv = document.createElement('div');
     commentDiv.className = 'forum-comment';
-    
-    // Comment header
+    commentDiv.dataset.commId = comment.commId;
+
+    // Header
     const headerDiv = document.createElement('div');
     headerDiv.className = 'forum-comment-header';
-    
+
     const authorSpan = document.createElement('span');
     authorSpan.className = 'forum-comment-author';
     authorSpan.textContent = comment.author_name;
-    
+
     const timeSpan = document.createElement('span');
     timeSpan.className = 'forum-comment-time';
     timeSpan.textContent = formatCommentTime(comment.postedAt);
-    
+
     headerDiv.appendChild(authorSpan);
     headerDiv.appendChild(timeSpan);
-    
-    // Comment text
-    const textP = document.createElement('p');
-    textP.className = 'forum-comment-text';
-    textP.textContent = comment.text;
-    
-    commentDiv.appendChild(headerDiv);
-    commentDiv.appendChild(textP);
-    
-    // Add delete button if user owns the comment
+
+    // Actions (reply + delete)
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'forum-comment-actions';
+
+    if (loggedIn) {
+        const replyBtn = document.createElement('button');
+        replyBtn.textContent = 'Reply';
+        replyBtn.className = 'action-btn reply-btn';
+        replyBtn.onclick = function () {
+            showInlineReplyForm(commentDiv, comment.commId, eventId);
+        };
+        actionsDiv.appendChild(replyBtn);
+    }
+
     if (currentUid && comment.author_uid === currentUid) {
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'action-btn delete-btn';
-        deleteBtn.onclick = function() {
-            if (confirm(
-                'Are you sure you want to delete this comment?')) {
-                    deleteComment(comment.commId);
+        deleteBtn.onclick = function () {
+            if (confirm('Are you sure you want to delete this comment?')) {
+                deleteComment(comment.commId);
             }
         };
-        commentDiv.appendChild(deleteBtn);
+        actionsDiv.appendChild(deleteBtn);
     }
-    
+
+    headerDiv.appendChild(actionsDiv);
+
+    // Text
+    const textP = document.createElement('p');
+    textP.className = 'forum-comment-text';
+    textP.textContent = comment.text;
+
+    commentDiv.appendChild(headerDiv);
+    commentDiv.appendChild(textP);
+
+    // Container for replies
+    const repliesContainer = document.createElement('div');
+    repliesContainer.className = 'forum-replies';
+
+    const children = (childrenByParent && childrenByParent[comment.commId]) || [];
+    children.forEach(child => {
+        const childEl = createCommentElement(
+            child,
+            currentUid,
+            loggedIn,
+            eventId,
+            childrenByParent
+        );
+        childEl.classList.add('forum-comment-reply');
+        repliesContainer.appendChild(childEl);
+    });
+
+    commentDiv.appendChild(repliesContainer);
+
     return commentDiv;
+}
+
+// Show an inline reply form under a comment
+function showInlineReplyForm(commentDiv, parentCommId, eventId) {
+    // Avoid adding multiple reply forms under the same comment
+    if (commentDiv.querySelector('.inline-reply-form')) {
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.className = 'inline-reply-form';
+
+    const textarea = document.createElement('textarea');
+    textarea.name = 'reply-text';
+    textarea.className = 'reply-textarea';
+    textarea.placeholder = 'Write a reply...';
+    textarea.required = true;
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'action-btn reply-submit-btn';
+    submitBtn.textContent = 'Reply';
+
+    form.appendChild(textarea);
+    form.appendChild(submitBtn);
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const text = textarea.value.trim();
+        if (!text) {
+            return;
+        }
+        submitReply(parentCommId, eventId, text);
+    });
+
+    commentDiv.appendChild(form);
+}
+
+// Send reply via AJAX and reload comments (no full page refresh)
+function submitReply(parentCommId, eventId, text) {
+    fetch(`/api/comment/${parentCommId}/reply`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ text: text })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload all comments for this event (still no page reload)
+            loadForumComments(eventId, true);
+        } else {
+            alert(data.error || 'Failed to post reply');
+        }
+    })
+    .catch(error => {
+        console.error('Error posting reply:', error);
+        alert('Failed to post reply');
+    });
 }
 
 // Format comment timestamp

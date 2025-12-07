@@ -189,7 +189,7 @@
 
         {% if comments %}
             {% for comment in comments %}
-            <div class="comment">
+            <div class="comment {% if comment.parent_commId %}comment-reply{% endif %}">
                 <div class="comment-header">
                     <div class="comment-author-info">
                         <span class="comment-author">
@@ -223,6 +223,19 @@
                 <div class="comment-content">
                     {{ comment.text }}
                 </div>
+                {% if session.uid %}
+                <form method="POST"
+                    action="{{ url_for('reply_to_comment', commId=comment.commId) }}"
+                    class="reply-form">
+                    <input type="text"
+                        name="text"
+                        placeholder="Reply..."
+                        required>
+                    <button type="submit" class="btn-reply">
+                        Reply
+                    </button>
+                </form>
+            {% endif %}
             </div>
             {% endfor %}
         {% else %}

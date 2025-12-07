@@ -89,6 +89,7 @@ def get_forum_comments(conn, fid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''
         SELECT co.commId, co.text, co.postedAt,
+               co.parent_commId, 
                p.name as author_name, p.uid as author_uid
         FROM comments co
         JOIN person p ON co.addedBy = p.uid
@@ -117,6 +118,15 @@ def insert_comment(conn, text, uid, fid):
     conn.commit()
     return curs.lastrowid
 
+def insert_reply(conn, text, uid, fid, parent_commId):
+    """Insert a reply to an existing comment"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+        INSERT INTO comments (text, addedBy, fid, parent_commId, postedAt)
+        VALUES (%s, %s, %s, %s, NOW())
+    ''', [text, uid, fid, parent_commId])
+    conn.commit()
+    return curs.lastrowid
 
 def get_comment_info(conn, comm_id):
     """Get comment information including the associated event ID"""
