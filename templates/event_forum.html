@@ -13,7 +13,9 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-<div class="event-forum-container">
+<div class="event-forum-container"
+    data-event-id="{{ event.eid }}"
+    data-logged-in="{{ 'true' if session.uid else 'false' }}">
     <a href="{{ back_url }}" class="back-link">
         ← Back
     </a>
@@ -161,10 +163,7 @@
     <div class="comment-form">
         <h3>Add a Comment</h3>
         {% if session.uid %}
-            <form method="POST" 
-                  action="{{ url_for(
-                      'add_comment_to_event', eid=event.eid
-                  ) }}">
+            <form id="main-comment-form">
                 <label for="comment-text">Your Comment</label>
                 <textarea id="comment-text"
                           name="text" 
@@ -176,73 +175,18 @@
                 </button>
             </form>
         {% else %}
-            <p>
-                You must be logged in to comment.
-            </p>
+            <p>You must be logged in to comment.</p>
         {% endif %}
     </div>
 
     <div class="comments-section">
         <div class="comments-header">
-            Comments ({{ comments|length }})
+            Comments (<span id="comment-count">0</span>)
         </div>
-
-        {% if comments %}
-            {% for comment in comments %}
-            <div class="comment {% if comment.parent_commId %}comment-reply{% endif %}">
-                <div class="comment-header">
-                    <div class="comment-author-info">
-                        <span class="comment-author">
-                            {{ comment.author_name }}
-                        </span>
-                        <span class="comment-time">
-                            {% if comment.postedAt %}
-                                {{ comment.postedAt|time_ago }}
-                            {% else %}
-                                just now
-                            {% endif %}
-                        </span>
-                    </div>
-                    {% if session.uid == comment.author_uid %}
-                        <form method="POST" 
-                              action="{{ url_for(
-                                  'delete_comment', 
-                                  commId=comment.commId
-                              ) }}"
-                              class="delete-comment-form"
-                              onsubmit="return confirm(
-                                  'Delete this comment?'
-                              )">
-                            <button type="submit" 
-                                    class="delete-comment-btn">
-                                Delete
-                            </button>
-                        </form>
-                    {% endif %}
-                </div>
-                <div class="comment-content">
-                    {{ comment.text }}
-                </div>
-                {% if session.uid %}
-                <form method="POST"
-                    action="{{ url_for('reply_to_comment', commId=comment.commId) }}"
-                    class="reply-form">
-                    <input type="text"
-                        name="text"
-                        placeholder="Reply..."
-                        required>
-                    <button type="submit" class="btn-reply">
-                        Reply
-                    </button>
-                </form>
-            {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-comments">
-                No comments yet. Be the first to comment!
-            </div>
-        {% endif %}
+        <div id="comments-list">
+            <!-- Comments will be loaded via JavaScript -->
+        </div>
     </div>
 </div>
+<script src="{{ url_for('static', filename='event_forum.js') }}"></script>
 {% endblock %}
