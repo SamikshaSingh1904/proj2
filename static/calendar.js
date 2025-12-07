@@ -446,7 +446,8 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'forum-comment-time';
-    timeSpan.textContent = formatCommentTime(comment.postedAt);
+    const formattedTime = formatCommentTime(comment.postedAt);
+    timeSpan.textContent = formattedTime;  // CHANGE THIS LINE
 
     headerDiv.appendChild(authorSpan);
     headerDiv.appendChild(timeSpan);
@@ -582,10 +583,8 @@ function formatCommentTime(timestamp) {
     const diffDays = Math.floor(diffMs / 86400000);
     
     if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return 
-        `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return 
-        `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 }
 

@@ -1010,13 +1010,14 @@ def get_event_forum(eid):
         # Format comments for JSON response
         formatted_comments = []
         for comment in comments:
+            posted_at_value = comment['postedAt'].isoformat() if comment['postedAt'] else None
+
             formatted_comments.append({
                 'commId': comment['commId'],
                 'text': comment['text'],
                 'author_name': comment['author_name'],
                 'author_uid': comment['author_uid'],
-                'postedAt': (comment['postedAt'].isoformat() 
-                             if comment['postedAt'] else None),
+                'postedAt': posted_at_value,
                 'parent_commId': comment.get('parent_commId')
             })
         
