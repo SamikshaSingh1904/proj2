@@ -1719,7 +1719,7 @@ nav ul li a:hover {
 }
 
 .btn-edit {
-    background-color: #007bff;
+    background-color: var(--color-header);
     color: white;
     display: inline-block;
     margin-top: 10px;
