@@ -1502,7 +1502,7 @@ nav ul li a:hover {
 .section-title {
     font-size: 20px;
     font-weight: 600;
-    color: #007bff;
+    color: var(--color-header);
     margin-bottom: 15px;
 }
 
@@ -1543,7 +1543,7 @@ nav ul li a:hover {
 .event-item-title {
     font-size: 16px;
     font-weight: 600;
-    color: #007bff;
+    color: var(--color-header);
 }
 
 .event-category-badge {
@@ -1599,7 +1599,7 @@ nav ul li a:hover {
 }
 
 .edit-btn {
-    background-color: #007bff;
+    background-color: var(--color-header);
     color: white;
 }
 
@@ -1643,6 +1643,17 @@ nav ul li a:hover {
 
 .section-title {
     margin: 0;
+}
+
+.custom-h2 {
+    display: block;
+    font-size: 1.17em; 
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    color: var(--color-header);
 }
 
 
@@ -1710,7 +1721,7 @@ nav ul li a:hover {
 }
 
 .btn-edit {
-    background-color: #007bff;
+    background-color: var(--color-header);
     color: white;
     display: inline-block;
     margin-top: 10px;
