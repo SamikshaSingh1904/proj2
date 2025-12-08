@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeBtn) {
         closeBtn.addEventListener('click', closeEventPanel);
     }
-    // ========== START: CATEGORY FILTER FUNCTIONALITY ==========
+    
+    // ========== CATEGORY FILTER FUNCTIONALITY ==========
     // Add event listeners to category filter buttons
     document.querySelectorAll('.filter-toggle').forEach(button => {
         button.addEventListener('click', function() {
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    // ========== END: CATEGORY FILTER FUNCTIONALITY ==========
+    // ========== END FILTER FUNCTIONALITY ==========
 
     // Restore category filter from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -317,8 +318,6 @@ function joinEvent(eventId) {
         if (data.success) {
             // Reload the event panel to show updated participant list
             openEventPanel(eventId);
-            // Optionally reload the calendar to show you're now a participant
-            // window.location.reload();
         } else {
             alert(data.error || 'Failed to join event');
         }
@@ -340,8 +339,6 @@ function leaveEvent(eventId) {
             if (data.success) {
                 // Reload the event panel to show updated participant list
                 openEventPanel(eventId);
-                // Optionally reload the calendar
-                // window.location.reload();
             } else {
                 alert(data.error || 'Failed to leave event');
             }

@@ -347,7 +347,7 @@ nav ul li a:hover {
 
 /* Style today's date differently */
 .date-label.today-date {
-    color: #f39c12;
+    color: #d16800;
     font-size: 1.3rem;
 }
 
@@ -647,9 +647,7 @@ nav ul li a:hover {
     }
 }
 
-/* ========================================================================= */
-/* RESPONSIVE DESIGN */
-/* ========================================================================= */
+
 
 @media (max-width: 768px) {
     .calendar-grid {
@@ -1232,7 +1230,7 @@ nav ul li a:hover {
 }
 
 /* ========================================================================= */
-/* CALENDAR EVENT PANEL - ADDITIONAL STYLES */
+/* CALENDAR EVENT PANEL */
 /* ========================================================================= */
 
 /* Event Panel Action Buttons Container */
@@ -1266,7 +1264,7 @@ nav ul li a:hover {
 #login-prompt,
 #forum-login-prompt {
     display: none;
-    color: #7f8c8d;
+    color: #666666;
     font-style: italic;
 }
 
@@ -1543,7 +1541,7 @@ nav ul li a:hover {
 .event-item-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--color-header);
+    color: #007bff;
 }
 
 .event-category-badge {
@@ -1721,7 +1719,7 @@ nav ul li a:hover {
 }
 
 .btn-edit {
-    background-color: var(--color-header);
+    background-color: #007bff;
     color: white;
     display: inline-block;
     margin-top: 10px;
@@ -1732,7 +1730,7 @@ nav ul li a:hover {
     background-color: #0056b3;
 }
 
-/* ========== START: COLOR-CODED EVENT CATEGORIES (WCAG AA COMPLIANT) ========== */
+
 /* Base event block styling */
 .event-block {
     border-left: 6px solid #dee2e6;
@@ -1747,7 +1745,8 @@ nav ul li a:hover {
 /* Make sure all text in events has good contrast */
 .event-block .event-time,
 .event-block .event-cal-title {
-    color: #1a1a1a; /* Very dark gray - ensures 4.5:1+ contrast on all backgrounds */
+    color: #1a1a1a; 
+    /* Very dark gray - ensures 4.5:1+ contrast on all backgrounds */
 }
 
 /* Color coding by category - solid dark borders with light backgrounds */
@@ -1801,10 +1800,7 @@ nav ul li a:hover {
     background: #ede7ff;
     border-left-color: #4c2d99;
 }
-/* ========== END: COLOR-CODED EVENT CATEGORIES (WCAG AA COMPLIANT) ========== */
 
-
-/* ========== START: CATEGORY FILTER STYLES (WCAG AA COMPLIANT) ========== */
 /* Category filter buttons */
 .category-filters {
     display: flex;
@@ -1894,11 +1890,7 @@ nav ul li a:hover {
     border-color: #5f3dc4;
     background: #ede7ff;
 }
-/* ========== END: CATEGORY FILTER STYLES (WCAG AA COMPLIANT) ========== */
 
-/* ========================================================================= */
-/* EVENT FORUM PAGE - INLINE REPLY FORM */
-/* ========================================================================= */
 
 /* Event forum page - inline reply form */
 .inline-reply-form {

@@ -24,6 +24,8 @@ import form
 import forum as forum_db
 import bcrypt
 import password as password_db
+from pymysql.err import DataError
+
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -119,7 +121,7 @@ def create_event():
     Shows the Create Event form (GET) and handles form submission (POST).
     - GET: fetches categories and displays the blank form.
     - POST: validates required fields, inserts the event into the database,
-            auto-adds the creator as a participant, then redirects to calendar.
+        auto-adds the creator as a participant, then redirects to calendar.
     '''
     conn = get_conn()
     uid = session['uid'] 
@@ -212,17 +214,36 @@ def create_event():
     # Get flexible checkbox value
     flexible = request.form.get('event-flexible') == 'on'
 
-    #insert event and auto-add creator 
-    eid = form.insert_event(
-        conn,
-        title, date_str, start_str, end_str,
-        desc, uid, city, state, cap, 
-        flexible=flexible, cid=cid
-    )
+    try:
+        #insert event and auto-add creator 
+        eid = form.insert_event(
+            conn,
+            title, date_str, start_str, end_str,
+            desc, uid, city, state, cap, 
+            flexible=flexible, cid=cid
+        )
 
-    form.add_participant(conn, eid, uid)
+        form.add_participant(conn, eid, uid)
 
-    flash("Event created and you have been added as a participant.", 'success')
+    except DataError:
+        flash("Title is too long. Please shorten it.", "error")
+        return render_template(
+            'create_event.html',
+            page_title='Create Event',
+            categories=categories,
+            title=title,
+            date=date_str,
+            start=start_str,
+            end=end_str,
+            city=city,
+            state=state,
+            desc=desc,
+            cap=cap_str,
+            cid=cid
+        )
+
+    flash("Event created and you have been added as a participant.", 
+          'success')
     return redirect(url_for('calendar'))
 
 @app.route('/forum')
@@ -282,11 +303,8 @@ def view_event_forum(eid):
         # Get today's date for comparison
         today = datetime.now().date()
 
-        # Determine back URL (where they came from)
-        referrer = request.referrer
-        # If they came from clump, use that; otherwise default to forum
-        back_url = (referrer if referrer and request.host in referrer
-                    else url_for('forum'))
+        # Default to forum
+        back_url = url_for('forum')
         
         return render_template('event_forum.html', 
                                page_title='Event Forum', 
@@ -346,12 +364,17 @@ def join_event(eid):
         # Check if event date has passed
         if event['date'] < datetime.now().date():
             flash('Cannot join past events', 'error')
-            return redirect(url_for('view_event_forum', eid=eid))
+            # Get next parameter or default to event forum
+            next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+            return redirect(next_url)
         
         # Check if already joined
         if forum_db.is_user_participant(conn, eid, session['uid']):
             flash('You have already joined this event', 'error')
-            return redirect(url_for('view_event_forum', eid=eid))
+            next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+            return redirect(next_url)
         
         # Attempt to add participant (checks capacity atomically)
         success = forum_db.add_participant(conn, eid, session['uid'])
@@ -360,12 +383,16 @@ def join_event(eid):
             flash('Successfully joined the event!', 'success')
         else:
             flash('Event is full', 'error')
-            
-        return redirect(url_for('view_event_forum', eid=eid))
+        
+        next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+        return redirect(next_url)
     
     except Exception as ex:
         flash(f'Error joining event: {str(ex)}', 'error')
-        return redirect(url_for('view_event_forum', eid=eid))
+        next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+        return redirect(next_url)
     
 @app.route('/forum/event/<int:eid>/leave', methods=['POST'])
 @login_required
@@ -379,17 +406,24 @@ def leave_event(eid):
         
         if creator_uid and creator_uid == session['uid']:
             flash('Event creators cannot leave their own events', 'error')
-            return redirect(url_for('view_event_forum', eid=eid))
+            next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+            return redirect(next_url)
         
         # Remove participant
         forum_db.remove_participant(conn, eid, session['uid'])
         
         flash('Successfully left the event', 'success')
-        return redirect(url_for('view_event_forum', eid=eid))
+
+        next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+        return redirect(next_url)
     
     except Exception as ex:
         flash(f'Error leaving event: {str(ex)}', 'error')
-        return redirect(url_for('view_event_forum', eid=eid))
+        next_url = request.args.get('next') or url_for(
+                'view_event_forum', eid=eid)
+        return redirect(next_url)
 
 @app.route('/event/<int:eid>/edit', methods=['GET', 'POST'])
 @login_required
@@ -599,12 +633,8 @@ def login():
             if user:
                 # Check password using bcrypt
                 stored_hash = user['pass']
-                # Convert password to bytes if it's a string
-                if isinstance(password, str):
-                    password = password.encode('utf-8')
-                # Convert stored hash to bytes if it's a string
-                if isinstance(stored_hash, str):
-                    stored_hash = stored_hash.encode('utf-8')
+                password = password.encode('utf-8')
+                stored_hash = stored_hash.encode('utf-8')
                 
                 if bcrypt.checkpw(password, stored_hash):
                     # Login successful
@@ -671,7 +701,8 @@ def signup():
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password_bytes, salt)
             
-            # Insert new user - raises exception if email exists (thread-safe)
+            # Insert new user - 
+            # raises exception if email exists (thread-safe)
             # Exception caught per create_user() in password.py
             new_uid = password_db.create_user(conn, name, email, 
                                               hashed_password, 
@@ -1156,7 +1187,7 @@ def reply_to_comment(commId):
             flash('Forum not found', 'error')
             return redirect(url_for('forum'))
 
-        # Insert reply using the same helper you made in forum.py
+        # Insert reply using the same helper in forum.py
         forum_db.insert_reply(conn, text, session['uid'], fid, commId)
 
         flash('Reply added!', 'success')
