@@ -32,7 +32,13 @@ def create_user(conn, name, email, hashed_password, bio, year, pronouns):
                    Currently caught in app.py > signup() route.
     
     Note: Uses database UNIQUE constraint for thread-safe duplicate detection.
-          Checking email_exists() before insert would have a race condition.
+          Checking email_exists() before insert would have a race condition:
+          Thread A checks -> email doesn't exist
+          Thread B checks -> email doesn't exist
+          Thread A inserts -> success
+          Thread B inserts -> duplicate error!
+          By relying on the database constraint, the duplicate check and insert
+          happen atomically at the database level.
     """
     curs = dbi.dict_cursor(conn)
     try:

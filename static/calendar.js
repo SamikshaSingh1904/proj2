@@ -35,8 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const newDate = `${year}-${month}-${day}`;
 
             // Preserve category filter
-            const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
-            const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
+            const activeCategory = document
+                .querySelector('.filter-toggle.active').dataset.category;
+            const categoryParam = 
+                activeCategory !== 'all' 
+                ? `?category=${encodeURIComponent(activeCategory)}` : '';
             
             window.location.href = `/calendar/${newDate}${categoryParam}`;
         }
@@ -57,8 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const newDate = `${year}-${month}-${day}`;
 
             // Preserve category filter
-            const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
-            const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
+            const activeCategory = document
+                .querySelector('.filter-toggle.active').dataset.category;
+            const categoryParam = 
+                activeCategory !== 'all' 
+                ? `?category=${encodeURIComponent(activeCategory)}` : '';
             
             window.location.href = `/calendar/${newDate}${categoryParam}`;
         }
@@ -67,8 +73,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Today button - go back to current week
     document.getElementById('today-btn').addEventListener('click', function() {
         // Preserve category filter
-        const activeCategory = document.querySelector('.filter-toggle.active').dataset.category;
-        const categoryParam = activeCategory !== 'all' ? `?category=${encodeURIComponent(activeCategory)}` : '';
+        const activeCategory = document
+            .querySelector('.filter-toggle.active').dataset.category;
+        const categoryParam = 
+            activeCategory !== 'all' 
+            ? `?category=${encodeURIComponent(activeCategory)}` : '';
 
         window.location.href = `/calendar/${categoryParam}`;
     });
@@ -120,7 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (categoryFromUrl) {
         // Find and click the matching filter button
-        const matchingButton = document.querySelector(`.filter-toggle[data-category="${categoryFromUrl}"]`);
+        const matchingButton = document
+            .querySelector(
+                `.filter-toggle[data-category="${categoryFromUrl}"]`);
         if (matchingButton) {
             matchingButton.click();
         }
@@ -431,7 +442,8 @@ function loadForumComments(eventId, loggedIn) {
 }
 
 // Create a comment element (with nested replies)
-function createCommentElement(comment, currentUid, loggedIn, eventId, childrenByParent) {
+function createCommentElement(comment, currentUid, loggedIn, 
+                            eventId, childrenByParent) {
     // Wrapper holds comment + timestamp (NOT replies)
     const wrapper = document.createElement('div');
     wrapper.className = 'forum-comment-wrapper';
@@ -504,7 +516,8 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
     container.appendChild(wrapper);
 
     // Replies go AFTER the wrapper, in a separate div
-    const children = (childrenByParent && childrenByParent[comment.commId]) || [];
+    const children = 
+        (childrenByParent && childrenByParent[comment.commId]) || [];
     if (children.length > 0) {
         const repliesContainer = document.createElement('div');
         repliesContainer.className = 'forum-replies';
@@ -624,8 +637,12 @@ function formatCommentTime(timestamp) {
     const diffDays = Math.floor(diffMs / 86400000);
     
     if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffMins < 60) {
+        return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    }
+    if (diffHours < 24) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    }
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 }
 

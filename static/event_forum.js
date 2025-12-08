@@ -71,7 +71,8 @@ function loadForumComments(eventId, loggedIn) {
 }
 
 // Create comment element with nested replies
-function createCommentElement(comment, currentUid, loggedIn, eventId, childrenByParent) {
+function createCommentElement(comment, currentUid, loggedIn, 
+                            eventId, childrenByParent) {
     const commentDiv = document.createElement('div');
     commentDiv.className = 'comment';
     commentDiv.dataset.commId = comment.commId;
@@ -137,7 +138,8 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
     const repliesContainer = document.createElement('div');
     repliesContainer.className = 'comment-replies';
 
-    const children = (childrenByParent && childrenByParent[comment.commId]) || [];
+    const children = 
+        (childrenByParent && childrenByParent[comment.commId]) || [];
     children.forEach(child => {
         const childEl = createCommentElement(
             child,
@@ -263,8 +265,12 @@ function formatCommentTime(timestamp) {
     const diffDays = Math.floor(diffMs / 86400000);
     
     if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffMins < 60) {
+        return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    }
+    if (diffHours < 24) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    }
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 }
 

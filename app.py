@@ -75,7 +75,7 @@ def calendar(date_str=None):
     date_str format: YYYY-MM-DD 
     Renders template for the calendar!
     '''
-    conn = dbi.connect()
+    conn = get_conn()
 
     if date_str: # Manual URL entry
         try:
@@ -237,11 +237,10 @@ def forum():
         # Get all events with their forums
         events = forum_db.get_all_events_with_forums(conn, show_past)
         
-        # Get comment count for each event's forum
+        # Format times for each event
         for evt in events:
             evt['start_formatted'] = e.format_time(evt.get('start'))
             evt['end_formatted'] = e.format_time(evt.get('end'))
-            evt['comment_count'] = forum_db.get_comment_count(conn, evt['fid'])
         
         return render_template('forum.html', 
                                page_title='Forum', 
@@ -412,6 +411,11 @@ def edit_event(eid):
         flash('You can only edit your own events', 'error')
         return redirect(url_for('view_event_forum', eid=eid))
     
+    # Check if event has already passed
+    if event['date'] < datetime.now().date():
+        flash('Cannot edit past events', 'error')
+        return redirect(url_for('view_event_forum', eid=eid))
+    
     if request.method == 'POST':
         # Handle the edit form submission, update event, and
         # redirect back to event page
@@ -451,6 +455,17 @@ def edit_event(eid):
         if not cid_str:
             flash("Category is required.", 'error')
             error = True
+
+        # Validate the new date isn't in the past
+        if date_str:
+            try:
+                new_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                if new_date < datetime.now().date():
+                    flash("Cannot set event date to the past.", 'error')
+                    error = True
+            except ValueError:
+                flash("Invalid date format.", 'error')
+                error = True
 
         #capacity handling that defaults to 10 
         cap = None
@@ -496,7 +511,7 @@ def edit_event(eid):
             )
         
         # Update event in database
-        e.update_event(conn, eid, title, desc, date_str, start_str, end_str, 
+        e.update_event(conn, eid, title, desc, date_str, start_str, end_str,
                        city, state, cap, flexible, cid)
         
         flash('Event updated successfully', 'success')
@@ -850,7 +865,7 @@ def get_event_details(eid):
     given and event eid. Displays full event details and participant info,
     returning JSON for the event side panel
     """
-    conn = dbi.connect()
+    conn = get_conn()
     
     # Get event details using event.py module
     event_data = e.get_event_by_id(conn, eid)
@@ -1010,7 +1025,12 @@ def get_event_forum(eid):
         # Format comments for JSON response
         formatted_comments = []
         for comment in comments:
-            posted_at_value = comment['postedAt'].isoformat() if comment['postedAt'] else None
+            posted_at = comment['postedAt']
+
+            if posted_at:
+                posted_at_value = posted_at.isoformat()
+            else:
+                posted_at_value = None
 
             formatted_comments.append({
                 'commId': comment['commId'],

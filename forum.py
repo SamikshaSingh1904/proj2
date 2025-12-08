@@ -20,19 +20,22 @@ def get_all_events_with_forums(conn, show_past=False):
                p.name as creator_name, p.uid as creator_uid,
                c.category,
                f.fid,
-               COUNT(DISTINCT part.uid) as participant_count
+               COUNT(DISTINCT part.uid) as participant_count,
+               COUNT(DISTINCT co.commId) as comment_count
         FROM events e
         JOIN person p ON e.addedBy = p.uid
         JOIN calendar c ON e.cid = c.cid
         JOIN forum f ON e.eid = f.eid
         LEFT JOIN participants part ON e.eid = part.eid
+        LEFT JOIN comments co ON f.fid = co.fid
     '''
 
     if not show_past:
         query += ' WHERE e.date >= CURDATE()'
     
     query += '''
-        GROUP BY e.eid
+        GROUP BY e.eid, e.title, e.desc, e.date, e.start, e.end,
+                e.city, e.state, e.cap, p.name, p.uid, c.category, f.fid
         ORDER BY e.date ASC, e.start ASC
     '''
     
@@ -128,17 +131,6 @@ def insert_reply(conn, text, uid, fid, parent_commId):
     conn.commit()
     return curs.lastrowid
 
-def get_comment_info(conn, comm_id):
-    """Get comment information including the associated event ID"""
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        SELECT co.addedBy, f.eid
-        FROM comments co
-        JOIN forum f ON co.fid = f.fid
-        WHERE co.commId = %s
-    ''', [comm_id])
-    return curs.fetchone()
-
 
 def delete_comment_by_id(conn, comm_id):
     """Delete a comment from the database"""
@@ -182,6 +174,16 @@ def add_participant(conn, eid, uid):
 
     Note: Already-joined check should be done before calling this function
           for better error messages. This function focuses on capacity check.
+    
+    THREAD SAFETY:
+        Uses SELECT ... FOR UPDATE to lock the event row, 
+        preventing race conditions. Without the lock, this could happen:
+        Thread A reads current_count=9, cap=10 -> has space
+        Thread B reads current_count=9, cap=10 -> has space
+        Thread A inserts -> current_count now 10
+        Thread B inserts -> current_count now 11 (OVER CAPACITY!)
+        
+        FOR UPDATE lock ensures only one thread can read and modify at a time.
     """
     curs = dbi.dict_cursor(conn)
     try:

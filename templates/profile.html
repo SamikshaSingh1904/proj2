@@ -59,11 +59,14 @@
         My Events ({{ created_events|length }})
       </h2>
       {% if show_past_created %}
-        <a href="{{ url_for('profile', show_past_joined=show_past_joined) }}" 
+        <a href="{{ url_for('profile', show_past_joined=show_past_joined) }}"
           class="filter-btn">Show Upcoming Only
         </a>
       {% else %}
-        <a href="{{ url_for('profile', show_past_created='true', show_past_joined=show_past_joined) }}" 
+        <a href="{{ url_for(
+            'profile', show_past_created='true', 
+            show_past_joined=show_past_joined
+          ) }}" 
           class="filter-btn">Show All Events
         </a>
       {% endif %}
@@ -95,7 +98,9 @@
     </div>
     {% else %}
     <div class="empty-state">
-      You haven't created any {% if not show_past_created %}upcoming {% endif %}events yet.
+      You haven't created any 
+      {% if not show_past_created %}upcoming 
+      {% endif %}events yet.
     </div>
     {% endif %}
   </div>
@@ -106,11 +111,14 @@
         Events I'm Attending ({{ joined_events|length }})
       </h2>
       {% if show_past_joined %}
-        <a href="{{ url_for('profile', show_past_created=show_past_created) }}" 
+        <a href="{{ url_for('profile', show_past_created=show_past_created) }}"
           class="filter-btn">Show Upcoming Only
         </a>
       {% else %}
-        <a href="{{ url_for('profile', show_past_created=show_past_created, show_past_joined='true') }}" 
+        <a href="{{ url_for(
+          'profile', show_past_created=show_past_created, 
+          show_past_joined='true'
+          ) }}" 
           class="filter-btn">Show All Events
         </a>
       {% endif %}
@@ -140,7 +148,9 @@
     </div>
     {% else %}
     <div class="empty-state">
-      You haven't joined any {% if not show_past_joined %}upcoming {% endif %}events yet.
+      You haven't joined any 
+      {% if not show_past_joined %}upcoming 
+      {% endif %}events yet.
       <a href="{{ url_for('forum') }}">Browse events</a>
     </div>
     {% endif %}
