@@ -1062,39 +1062,53 @@ nav ul li a:hover {
     margin-bottom: 8px;
 }
 
-/* New: inline reply form styling */
-.inline-reply-form {
+/* Inline reply form - full width */
+#event-panel .inline-reply-form {
     margin-top: 10px;
-    display: flex;
-    gap: 10px;
+    margin-right: -120px;
+    padding: 10px;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
-.inline-reply-form input {
-    flex: 1;
+#event-panel .reply-textarea {
+    width: 100%;
+    min-height: 60px;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    font-family: inherit;
     font-size: 14px;
+    resize: vertical;
+    margin-bottom: 8px;
+    box-sizing: border-box;
 }
 
-.inline-reply-form input:focus {
+#event-panel .reply-textarea:focus {
     outline: none;
-    border-color: var(--color-header);
+    border-color: var(--color-primary);
 }
 
-.btn-reply {
-    background-color: var(--color-header);
+#event-panel .reply-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Smaller buttons for reply form */
+#event-panel .reply-form-actions .action-btn {
+    padding: 0.4rem 0.8rem; /* Smaller padding */
+    font-size: 0.85rem; /* Smaller font */
+}
+
+#event-panel .cancel-reply-btn {
+    background-color: #6c757d;
     color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
 }
 
-.btn-reply:hover {
-    opacity: 0.9;
+#event-panel .cancel-reply-btn:hover {
+    background-color: #5a6268;
 }
 
 .delete-comment-btn {
@@ -1134,57 +1148,87 @@ nav ul li a:hover {
 /* CALENDAR.JS - FORUM COMMENT STYLES */
 /* ========================================================================= */
 
-/* Forum Comment Container */
-.forum-comment {
+/* Wrapper for individual comment */
+#event-panel .forum-comment-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+/* Forum Comment */
+#event-panel .forum-comment {
     background-color: #f8f9fa;
     padding: 1rem;
-    margin-bottom: 1rem;
+    padding-right: 140px;
+    margin-bottom: 0;
     border-radius: 6px;
     border-left: 3px solid #3498db;
 }
 
-/* Comment Header */
-.forum-comment-header {
+/* Nested replies - adds BOTH margin and border for the nested look */
+#event-panel .forum-replies {
+    margin-left: 30px;
+    border-left: 2px solid #e0e0e0;
+    padding-left: 15px;
+    margin-top: 10px; /* Add some space between parent and replies */
+}
+
+/* Timestamp - aligned to right edge of wrapper */
+#event-panel .forum-comment-time {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Comment Header - remove actions from here */
+#event-panel .forum-comment-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
 }
 
 /* Comment Author */
-.forum-comment-author {
+#event-panel .forum-comment-author {
     font-weight: 600;
     color: #2c3e50;
-}
-
-/* Comment Time */
-.forum-comment-time {
-    font-size: 0.85rem;
-    color: #7f8c8d;
+    font-size: 14px;
 }
 
 /* Comment Text */
-.forum-comment-text {
+#event-panel .forum-comment-text {
     margin: 0.5rem 0;
     line-height: 1.5;
     color: #333;
 }
 
-/* Small Delete Button in Comments */
-.forum-comment .delete-btn {
+/* Comment actions - position in bottom right */
+#event-panel .forum-comment-actions {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Reply and Delete buttons */
+#event-panel .reply-btn {
     font-size: 0.85rem;
-    padding: 0.4rem 0.8rem;
-    margin-top: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-/* Event Full Message */
-.event-full-message {
-    color: #e74c3c;
+#event-panel .reply-btn:hover {
+    background-color: var(--color-primary-dark);
 }
 
-/* Error Message in Comments */
-.comment-error-message {
-    color: #e74c3c;
+#event-panel .forum-comment .delete-btn {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
 }
 
 /* ========================================================================= */
@@ -1840,3 +1884,94 @@ nav ul li a:hover {
     background: #ede7ff;
 }
 /* ========== END: CATEGORY FILTER STYLES (WCAG AA COMPLIANT) ========== */
+
+/* ========================================================================= */
+/* EVENT FORUM PAGE - INLINE REPLY FORM */
+/* ========================================================================= */
+
+/* Event forum page - inline reply form */
+.inline-reply-form {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+}
+
+.reply-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 8px;
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--color-header);
+}
+
+.reply-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Event forum page - Reply button styling (small text button) */
+.btn-reply {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-weight: 600;
+}
+
+.btn-reply:hover {
+    text-decoration: underline;
+}
+
+/* Submit button in reply form - matches cancel button styling */
+.reply-form-actions .btn-reply {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.reply-form-actions .btn-reply:hover {
+    background-color: var(--color-primary-dark);
+    text-decoration: none;
+}
+
+/* Cancel button for event forum */
+.btn-cancel-reply {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-cancel-reply:hover {
+    background-color: #5a6268;
+}
+
+/* Comment actions container */
+.comment-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}

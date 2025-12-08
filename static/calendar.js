@@ -432,6 +432,12 @@ function loadForumComments(eventId, loggedIn) {
 
 // Create a comment element (with nested replies)
 function createCommentElement(comment, currentUid, loggedIn, eventId, childrenByParent) {
+    // Wrapper holds comment + timestamp (NOT replies)
+    const wrapper = document.createElement('div');
+    wrapper.className = 'forum-comment-wrapper';
+    wrapper.style.position = 'relative';
+    wrapper.style.marginBottom = '1rem';
+    
     const commentDiv = document.createElement('div');
     commentDiv.className = 'forum-comment';
     commentDiv.dataset.commId = comment.commId;
@@ -444,13 +450,7 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
     authorSpan.className = 'forum-comment-author';
     authorSpan.textContent = comment.author_name;
 
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'forum-comment-time';
-    const formattedTime = formatCommentTime(comment.postedAt);
-    timeSpan.textContent = formattedTime;  // CHANGE THIS LINE
-
     headerDiv.appendChild(authorSpan);
-    headerDiv.appendChild(timeSpan);
 
     // Actions (reply + delete)
     const actionsDiv = document.createElement('div');
@@ -488,26 +488,42 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
     commentDiv.appendChild(headerDiv);
     commentDiv.appendChild(textP);
 
-    // Container for replies
-    const repliesContainer = document.createElement('div');
-    repliesContainer.className = 'forum-replies';
+    // Timestamp - goes in wrapper
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'forum-comment-time';
+    const formattedTime = formatCommentTime(comment.postedAt);
+    timeSpan.textContent = formattedTime;
+    
+    // Add comment and timestamp to wrapper
+    wrapper.appendChild(commentDiv);
+    wrapper.appendChild(timeSpan);
 
+    // CONTAINER for this comment + its replies
+    const container = document.createElement('div');
+    container.className = 'forum-comment-container';
+    container.appendChild(wrapper);
+
+    // Replies go AFTER the wrapper, in a separate div
     const children = (childrenByParent && childrenByParent[comment.commId]) || [];
-    children.forEach(child => {
-        const childEl = createCommentElement(
-            child,
-            currentUid,
-            loggedIn,
-            eventId,
-            childrenByParent
-        );
-        childEl.classList.add('forum-comment-reply');
-        repliesContainer.appendChild(childEl);
-    });
+    if (children.length > 0) {
+        const repliesContainer = document.createElement('div');
+        repliesContainer.className = 'forum-replies';
+        
+        children.forEach(child => {
+            const childEl = createCommentElement(
+                child,
+                currentUid,
+                loggedIn,
+                eventId,
+                childrenByParent
+            );
+            repliesContainer.appendChild(childEl);
+        });
+        
+        container.appendChild(repliesContainer);
+    }
 
-    commentDiv.appendChild(repliesContainer);
-
-    return commentDiv;
+    return container;
 }
 
 // Show an inline reply form under a comment
@@ -517,33 +533,58 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
         return;
     }
 
-    const form = document.createElement('form');
+    const form = document.createElement('div');
     form.className = 'inline-reply-form';
 
     const textarea = document.createElement('textarea');
-    textarea.name = 'reply-text';
     textarea.className = 'reply-textarea';
     textarea.placeholder = 'Write a reply...';
-    textarea.required = true;
+    textarea.rows = 2;
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'reply-form-actions';
 
     const submitBtn = document.createElement('button');
-    submitBtn.type = 'submit';
-    submitBtn.className = 'action-btn reply-submit-btn';
-    submitBtn.textContent = 'Reply';
+    submitBtn.type = 'button';
+    submitBtn.className = 'action-btn reply-btn';
+    submitBtn.textContent = 'Submit';
 
-    form.appendChild(textarea);
-    form.appendChild(submitBtn);
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'action-btn cancel-reply-btn';
+    cancelBtn.textContent = 'Cancel';
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
+    // Hide the action buttons when form is shown
+    const actionsDiv = commentDiv.querySelector('.forum-comment-actions');
+    if (actionsDiv) {
+        actionsDiv.style.display = 'none';
+    }
+
+    submitBtn.onclick = function() {
         const text = textarea.value.trim();
         if (!text) {
+            alert('Please enter a reply');
             return;
         }
         submitReply(parentCommId, eventId, text);
-    });
+    };
+
+    cancelBtn.onclick = function() {
+        // Show the action buttons again when form is cancelled
+        if (actionsDiv) {
+            actionsDiv.style.display = 'flex';
+        }
+        form.remove();
+    };
+
+    buttonContainer.appendChild(submitBtn);
+    buttonContainer.appendChild(cancelBtn);
+    
+    form.appendChild(textarea);
+    form.appendChild(buttonContainer);
 
     commentDiv.appendChild(form);
+    textarea.focus();
 }
 
 // Send reply via AJAX and reload comments (no full page refresh)

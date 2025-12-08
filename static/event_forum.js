@@ -95,6 +95,29 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
     authorInfo.appendChild(timeSpan);
     headerDiv.appendChild(authorInfo);
 
+    // Content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'comment-content';
+    contentDiv.textContent = comment.text;
+
+    commentDiv.appendChild(headerDiv);
+    commentDiv.appendChild(contentDiv);
+
+    // Actions div for reply and delete (below content)
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'comment-actions';
+
+    // Reply button
+    if (loggedIn) {
+        const replyBtn = document.createElement('button');
+        replyBtn.textContent = 'Reply';
+        replyBtn.className = 'btn-reply';
+        replyBtn.onclick = function() {
+            showInlineReplyForm(commentDiv, comment.commId, eventId);
+        };
+        actionsDiv.appendChild(replyBtn);
+    }
+
     // Delete button
     if (currentUid && comment.author_uid === currentUid) {
         const deleteBtn = document.createElement('button');
@@ -105,27 +128,10 @@ function createCommentElement(comment, currentUid, loggedIn, eventId, childrenBy
                 deleteComment(comment.commId, eventId);
             }
         };
-        headerDiv.appendChild(deleteBtn);
+        actionsDiv.appendChild(deleteBtn);
     }
 
-    // Content
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'comment-content';
-    contentDiv.textContent = comment.text;
-
-    commentDiv.appendChild(headerDiv);
-    commentDiv.appendChild(contentDiv);
-
-    // Reply button and form
-    if (loggedIn) {
-        const replyBtn = document.createElement('button');
-        replyBtn.textContent = 'Reply';
-        replyBtn.className = 'btn-reply';
-        replyBtn.onclick = function() {
-            showInlineReplyForm(commentDiv, comment.commId, eventId);
-        };
-        commentDiv.appendChild(replyBtn);
-    }
+    commentDiv.appendChild(actionsDiv);
 
     // Nested replies container
     const repliesContainer = document.createElement('div');
@@ -158,31 +164,48 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
         return;
     }
 
-    const form = document.createElement('form');
+    const form = document.createElement('div');
     form.className = 'inline-reply-form';
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = 'text';
-    input.placeholder = 'Reply...';
-    input.required = true;
+    const textarea = document.createElement('textarea');
+    textarea.className = 'reply-textarea';
+    textarea.placeholder = 'Write a reply...';
+    textarea.rows = 2;
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'reply-form-actions';
 
     const submitBtn = document.createElement('button');
-    submitBtn.type = 'submit';
+    submitBtn.type = 'button';
     submitBtn.className = 'btn-reply';
-    submitBtn.textContent = 'Reply';
+    submitBtn.textContent = 'Submit';
 
-    form.appendChild(input);
-    form.appendChild(submitBtn);
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn-cancel-reply';
+    cancelBtn.textContent = 'Cancel';
 
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const text = input.value.trim();
-        if (!text) return;
+    submitBtn.onclick = function() {
+        const text = textarea.value.trim();
+        if (!text) {
+            alert('Please enter a reply');
+            return;
+        }
         submitReply(parentCommId, eventId, text);
-    });
+    };
+
+    cancelBtn.onclick = function() {
+        form.remove();
+    };
+
+    buttonContainer.appendChild(submitBtn);
+    buttonContainer.appendChild(cancelBtn);
+    
+    form.appendChild(textarea);
+    form.appendChild(buttonContainer);
 
     commentDiv.appendChild(form);
+    textarea.focus();
 }
 
 // Submit reply
