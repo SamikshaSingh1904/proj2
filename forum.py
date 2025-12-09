@@ -131,6 +131,16 @@ def insert_reply(conn, text, uid, fid, parent_commId):
     conn.commit()
     return curs.lastrowid
 
+def get_comment_info(conn, comm_id):
+    """Get comment information including the associated event ID"""
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+        SELECT co.addedBy, f.eid
+        FROM comments co
+        JOIN forum f ON co.fid = f.fid
+        WHERE co.commId = %s
+    ''', [comm_id])
+    return curs.fetchone()
 
 def delete_comment_by_id(conn, comm_id):
     """Delete a comment from the database"""
