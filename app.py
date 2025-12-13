@@ -17,7 +17,6 @@ app = Flask(__name__)
 import secrets
 import cs304dbi as dbi
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import event as e 
 import form
@@ -148,6 +147,20 @@ def create_event():
 
     error = False
 
+    # LENGTH VALIDATIONS 
+    if len(title) > 30:
+        flash("Title must be 30 characters or less.", 'error')
+        error = True
+    if len(city) > 30:
+        flash("City must be 30 characters or less.", 'error')
+        error = True
+    if len(state) > 20:
+        flash("State must be 20 characters or less.", 'error')
+        error = True
+    if desc and len(desc) > 300:
+        flash("Description must be 300 characters or less.", 'error')
+        error = True
+
     #required field checks 
     if not title:
         flash("Title is required.", 'error')
@@ -171,16 +184,24 @@ def create_event():
         flash("Category is required.", 'error')
         error = True
 
+    # TIME VALIDATION 
+    if start_str and end_str and start_str >= end_str:
+        flash("End time must be after start time.", 'error')
+        error = True
+
     #capacity handling that defaults to 10 
     cap = None
     if cap_str:
         if cap_str.isnumeric():
             cap = int(cap_str)
-            if cap < 0:
-                flash("Capacity must be non-negative.", 'error')
+            if cap < 2:
+                flash("Capacity must be at least 2.", 'error')
+                error = True
+            elif cap > 10000:
+                flash("Capacity cannot exceed 10,000.", 'error')
                 error = True
         else:
-            flash("Capacity must be a non-negative integer.", 'error')
+            flash("Capacity must be a positive integer.", 'error')
             error = True
     else:
         cap = 10
@@ -467,6 +488,20 @@ def edit_event(eid):
 
         error = False
 
+        # LENGTH VALIDATIONS
+        if len(title) > 30:
+            flash("Title must be 30 characters or less.", 'error')
+            error = True
+        if len(city) > 30:
+            flash("City must be 30 characters or less.", 'error')
+            error = True
+        if len(state) > 20:
+            flash("State must be 20 characters or less.", 'error')
+            error = True
+        if desc and len(desc) > 300:
+            flash("Description must be 300 characters or less.", 'error')
+            error = True
+
         #required field checks 
         if not title:
             flash("Title is required.", 'error')
@@ -501,13 +536,20 @@ def edit_event(eid):
                 flash("Invalid date format.", 'error')
                 error = True
 
-        #capacity handling that defaults to 10 
-        cap = None
+        # TIME VALIDATION
+        if start_str and end_str and start_str >= end_str:
+            flash("End time must be after start time.", 'error')
+            error = True
+
+        #capacity handling 
         if cap_str:
             if cap_str.isnumeric():
                 cap = int(cap_str)
-                if cap < 0:
-                    flash("Capacity must be non-negative.", 'error')
+                if cap < 2:
+                    flash("Capacity must be at least 2.", 'error')
+                    error = True
+                elif cap > 10000:
+                    flash("Capacity cannot exceed 10,000.", 'error')
                     error = True
             else:
                 flash("Capacity must be a non-negative integer.", 'error')
@@ -661,36 +703,66 @@ def login():
 def signup():
     """Handle user registration"""
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        year = request.form.get('year')
-        if year and year.strip():
-            year = int(year)
-        else:
-            year = None
-        pronouns = request.form.get('pronouns', None)
-        bio = request.form.get('bio', '')
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        year = request.form.get('year', '').strip()
+        pronouns = request.form.get('pronouns', '').strip()
+        bio = request.form.get('bio', '').strip()
+
+        error = False
+
+        # Length validations (to match database constraints)
+        if len(name) > 30:
+            flash('Name must be 30 characters or less', 'error')
+            error = True
+        if len(email) > 50:
+            flash('Email must be 50 characters or less', 'error')
+            error = True
+        if len(password) > 60:
+            flash('Password must be 60 characters or less', 'error')
+            error = True
+        if pronouns and len(pronouns) > 30:
+            flash('Pronouns must be 30 characters or less', 'error')
+            error = True
+        if bio and len(bio) > 100:
+            flash('Bio must be 100 characters or less', 'error')
+            error = True
         
         # Validation
         if not all([name, email, password, confirm_password]):
             flash('Please fill in all required fields', 'error')
-            return redirect(url_for('signup'))
+            error = True
         
         # Check Wellesley email
         if not email.endswith('@wellesley.edu'):
             flash('Please use your Wellesley email address', 'error')
-            return redirect(url_for('signup'))
+            error = True
         
         # Check password match
         if password != confirm_password:
             flash('Passwords do not match', 'error')
-            return redirect(url_for('signup'))
+            error = True
         
         # Check password length
         if len(password) < 8:
             flash('Password must be at least 8 characters long', 'error')
+            error = True
+
+        # Year validation
+        year_int = None
+        if year:
+            try:
+                year_int = int(year)
+                if year_int < 1900 or year_int > 2100:
+                    flash('Please enter a valid year', 'error')
+                    error = True
+            except ValueError:
+                flash('Year must be a number', 'error')
+                error = True
+
+        if error:
             return redirect(url_for('signup'))
         
         try:
@@ -706,7 +778,7 @@ def signup():
             # Exception caught per create_user() in password.py
             new_uid = password_db.create_user(conn, name, email, 
                                               hashed_password, 
-                                             bio, year, pronouns)
+                                             bio, year_int, pronouns)
             
             # Auto-login after signup
             session['uid'] = new_uid

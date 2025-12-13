@@ -17,15 +17,18 @@
         Update the details below to edit your event.
     </p> 
 
-    <form action="{{ url_for('edit_event', eid=event.eid) }}" method="POST">
+    <form action="{{ url_for('edit_event', eid=event.eid) }}" 
+          method="POST" id="event-form">
 
       <div class="form-group">
         <label for="event-title">Title <span class="required">*</span></label>
         <input type="text"
               id="event-title"
               name="title"
+              maxlength="30"
               value="{{ event.title or '' }}"
               required>
+        <span class="helper-text">Maximum 30 characters</span>
       </div>
 
       <div class="form-group">
@@ -71,8 +74,10 @@
           <input type="text"
                 id="event-city"
                 name="city"
+                maxlength="30"
                 value="{{ event.city or '' }}"
                 required>
+          <span class="helper-text">Maximum 30 characters</span>
         </div>
 
         <div class="form-group">
@@ -82,8 +87,10 @@
           <input type="text"
                 id="event-state"
                 name="state"
+                maxlength="20"
                 value="{{ event.state or '' }}"
                 required>
+          <span class="helper-text">Maximum 20 characters</span>
         </div>
       </div>
 
@@ -95,6 +102,7 @@
               id="event-cap"
               name="cap"
               min="2"
+              max="10000"
               value="{{ event.cap or '' }}">
         <div class="helper-text">
           Leave blank to use the default capacity 10.
@@ -106,8 +114,10 @@
         <textarea id="event-desc"
                   name="desc"
                   rows="4"
+                  maxlength="300"
                   placeholder="Add event details">{{ event.desc or '' }}
         </textarea>
+        <span class="helper-text">Maximum 300 characters</span>
       </div>
 
       <div class="form-group">
@@ -141,4 +151,8 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='form_validation.js') }}"></script>
 {% endblock %}
