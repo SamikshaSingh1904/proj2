@@ -36,9 +36,9 @@
         <input type="date"
               id="event-date"
               name="date"
-              value="{% if event.date %}
+              value="{%- if event.date -%}
                   {{ event.date.strftime('%Y-%m-%d') }}
-              {% endif %}"
+              {%- endif -%}"
               required>
       </div>
 
