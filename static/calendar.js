@@ -27,6 +27,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
+/**
+ * Update navigation based on login status
+ */
+function updateNavigation(loggedIn) {
+    const navRight = document.querySelector('.nav-right ul');
+    if (!navRight) return;
+    
+    if (loggedIn) {
+        navRight.innerHTML = `
+            <li><a href="/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        `;
+    } else {
+        navRight.innerHTML = `
+            <li><a href="/login">Login</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        `;
+    }
+}
+
 
 // Open event panel (split screen)
 function openEventPanel(eventId) {

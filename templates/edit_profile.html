@@ -94,8 +94,7 @@
                   name="bio"
                   maxlength="100"
                   placeholder="Tell us a bit about yourself...">
-                    {{ user.bio or '' }}
-        </textarea>
+        {{- user.bio or '' -}}</textarea>
         <p class="helper-text">
           Maximum 100 characters
         </p>
