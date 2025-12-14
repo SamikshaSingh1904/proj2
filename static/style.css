@@ -235,9 +235,6 @@ nav ul li a:hover {
     transition: flex 0.3s ease;
 }
 
-.calendar-container:has(.panel-open) .calendar-section {
-    flex: 0 0 60%;
-}
 
 /* Calendar Header */
 .calendar-header {
