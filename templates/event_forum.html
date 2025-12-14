@@ -114,13 +114,11 @@
                         </button>
                     </form>
                 {% elif user_is_participant and not is_creator %}
-                    <form method="POST" 
-                          action="{{ url_for(
-                              'leave_event', eid=event.eid, next=request.url
-                          ) }}"
-                          onsubmit="return confirm(
-                              'Are you sure you want to leave?'
-                          )">
+                    <form id="leave-event-form"
+                        method="POST" 
+                        action="{{ url_for(
+                            'leave_event', eid=event.eid, next=request.url
+                        ) }}">
                         <button type="submit" class="btn btn-leave">
                             Leave Event
                         </button>
@@ -134,13 +132,10 @@
                             Edit Event
                         </button>
                     </form>
-                    <form method="POST" 
+                    <form id="delete-event-form" 
+                        method="POST" 
                         action="{{ url_for(
-                            'delete_event', eid=event.eid
-                        ) }}"
-                        onsubmit="return confirm(
-                            'Are you sure you want to delete this event?'
-                        )">
+                            'delete_event', eid=event.eid) }}">
                         <button type="submit" class="btn btn-danger">
                             Delete Event
                         </button>

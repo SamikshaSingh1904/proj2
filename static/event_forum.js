@@ -16,6 +16,35 @@ document.addEventListener('DOMContentLoaded', function() {
     if (eventId) {
         loadForumComments(eventId, loggedIn);
     }
+
+    // Handle delete event button on event forum page
+    const deleteEventForm = document.getElementById('delete-event-form');
+    if (deleteEventForm) {
+        deleteEventForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            showConfirmModal(
+                'Delete this event? This action cannot be undone.',
+                () => {
+                    // Submit the form after confirmation
+                    deleteEventForm.submit();
+                },
+                'Delete Event'
+            );
+        });
+    }
+
+    // Handle leave event button
+    const leaveEventForm = document.getElementById('leave-event-form');
+    if (leaveEventForm) {
+        leaveEventForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            showConfirmModal(
+                'Are you sure you want to leave this event?',
+                () => leaveEventForm.submit(),
+                'Leave Event'
+            );
+        });
+    }
 });
 
 // Load forum comments (reuse from calendar.js with slight modifications)
@@ -125,9 +154,11 @@ function createCommentElement(comment, currentUid, loggedIn,
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'delete-comment-btn';
         deleteBtn.onclick = function() {
-            if (confirm('Delete this comment?')) {
-                deleteComment(comment.commId, eventId);
-            }
+            showConfirmModal(
+                'Delete this comment? This action cannot be undone.',
+                () => deleteComment(comment.commId, eventId),
+                'Delete Comment'
+            );
         };
         actionsDiv.appendChild(deleteBtn);
     }
@@ -190,7 +221,7 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
     submitBtn.onclick = function() {
         const text = textarea.value.trim();
         if (!text) {
-            alert('Please enter a reply');
+            showFlashMessage('Please enter a reply', 'error');
             return;
         }
         submitReply(parentCommId, eventId, text);
@@ -225,12 +256,13 @@ function submitReply(parentCommId, eventId, text) {
         if (data.success) {
             loadForumComments(eventId, true);
         } else {
-            alert(data.error || 'Failed to post reply');
+            showFlashMessage(
+                data.error || 'Failed to post reply', 'error');
         }
     })
     .catch(error => {
         console.error('Error posting reply:', error);
-        alert('Failed to post reply');
+        showFlashMessage('Failed to post reply', 'error');
     });
 }
 
@@ -244,12 +276,13 @@ function deleteComment(commId, eventId) {
         if (data.success) {
             loadForumComments(eventId, true);
         } else {
-            alert(data.error || 'Failed to delete comment');
+            showFlashMessage(
+                data.error || 'Failed to delete comment', 'error');
         }
     })
     .catch(error => {
         console.error('Error deleting comment:', error);
-        alert('Failed to delete comment');
+        showFlashMessage('Failed to delete comment', 'error');
     });
 }
 
@@ -284,7 +317,7 @@ if (mainCommentForm) {
         const text = textarea.value.trim();
         
         if (!text) {
-            alert('Please enter a comment');
+            showFlashMessage('Please enter a comment', 'error');
             return;
         }
         
@@ -301,12 +334,13 @@ if (mainCommentForm) {
                 textarea.value = '';
                 loadForumComments(eventId, true);
             } else {
-                alert(data.error || 'Failed to post comment');
+                showFlashMessage(
+                    data.error || 'Failed to post comment', 'error');
             }
         })
         .catch(error => {
             console.error('Error posting comment:', error);
-            alert('Failed to post comment');
+            showFlashMessage('Failed to post comment', 'error');
         });
     });
 }

@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-
     // Add click handler to close button
     const closeBtn = document.querySelector('.close-panel-btn');
     if (closeBtn) {
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 });
-
 
 
 // Open event panel (split screen)
@@ -117,10 +115,11 @@ function openEventPanel(eventId) {
                 
                 // Set up delete button
                 deleteBtn.onclick = function() {
-                    if (confirm(
-                        'Are you sure you want to delete this event?')) {
-                        deleteEvent(data.eid);
-                    }
+                    showConfirmModal(
+                        'Delete this event? This action cannot be undone.',
+                        () => deleteEvent(data.eid),
+                        'Delete Event'
+                    );
                 };
             } else {
                 // Regular logged-in user
@@ -167,7 +166,7 @@ function openEventPanel(eventId) {
         })
         .catch(error => {
             console.error('Error loading event:', error);
-            alert('Failed to load event details. Error: ' + error.message);
+            showFlashMessage('Failed to load event details', 'error');
         });
 }
 
@@ -182,12 +181,12 @@ function deleteEvent(eventId) {
             closeEventPanel();
             window.location.reload();
         } else {
-            alert(data.error || 'Failed to delete event');
+            showFlashMessage(data.error || 'Failed to delete event', 'error');
         }
     })
     .catch(error => {
         console.error('Error deleting event:', error);
-        alert('Failed to delete event');
+        showFlashMessage('Failed to delete event', 'error');
     })
 }
 
@@ -201,35 +200,40 @@ function joinEvent(eventId) {
             // Reload the event panel to show updated participant list
             openEventPanel(eventId);
         } else {
-            alert(data.error || 'Failed to join event');
+            showFlashMessage(data.error || 'Failed to join event', 'error');
         }
     })
     .catch(error => {
         console.error('Error joining event:', error);
-        alert('Failed to join event');
+        showFlashMessage('Failed to join event', 'error');
     });
 }
 
 // Leave an event
 function leaveEvent(eventId) {
-    if (confirm('Are you sure you want to leave this event?')) {
-        fetch(`/api/event/${eventId}/leave`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Reload the event panel to show updated participant list
-                openEventPanel(eventId);
-            } else {
-                alert(data.error || 'Failed to leave event');
-            }
-        })
-        .catch(error => {
-            console.error('Error leaving event:', error);
-            alert('Failed to leave event');
-        });
-    }
+    showConfirmModal(
+        'Are you sure you want to leave this event?',
+        () => {
+            fetch(`/api/event/${eventId}/leave`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload event panel to show updated participant list
+                    openEventPanel(eventId);
+                } else {
+                    showFlashMessage(
+                        data.error || 'Failed to leave event', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error leaving event:', error);
+                showFlashMessage('Failed to leave event', 'error');
+            });
+        },
+    'Leave Event'
+    );
 }
 
 function closeEventPanel() {
@@ -362,9 +366,11 @@ function createCommentElement(comment, currentUid, loggedIn,
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'action-btn delete-btn';
         deleteBtn.onclick = function () {
-            if (confirm('Are you sure you want to delete this comment?')) {
-                deleteComment(comment.commId);
-            }
+            showConfirmModal(
+                'Delete this comment? This action cannot be undone.',
+                () => deleteComment(comment.commId),
+                'Delete Comment'
+            );
         };
         actionsDiv.appendChild(deleteBtn);
     }
@@ -455,7 +461,7 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
     submitBtn.onclick = function() {
         const text = textarea.value.trim();
         if (!text) {
-            alert('Please enter a reply');
+            showFlashMessage('Please enter a reply', 'error');
             return;
         }
         submitReply(parentCommId, eventId, text);
@@ -495,12 +501,12 @@ function submitReply(parentCommId, eventId, text) {
             // Reload all comments for this event (still no page reload)
             loadForumComments(eventId, true);
         } else {
-            alert(data.error || 'Failed to post reply');
+            showFlashMessage(data.error || 'Failed to post reply', 'error');
         }
     })
     .catch(error => {
         console.error('Error posting reply:', error);
-        alert('Failed to post reply');
+        showFlashMessage('Failed to post reply', 'error');
     });
 }
 
@@ -530,7 +536,7 @@ function submitComment(eventId) {
     const commentText = document.getElementById('comment-text').value.trim();
     
     if (!commentText) {
-        alert('Please enter a comment');
+        showFlashMessage('Please enter a comment', 'error');
         return;
     }
     
@@ -549,12 +555,12 @@ function submitComment(eventId) {
             // Reload comments
             loadForumComments(eventId, true);
         } else {
-            alert(data.error || 'Failed to post comment');
+            showFlashMessage(data.error || 'Failed to post comment', 'error');
         }
     })
     .catch(error => {
         console.error('Error posting comment:', error);
-        alert('Failed to post comment');
+        showFlashMessage('Failed to post comment', 'error');
     });
 }
 
@@ -571,11 +577,12 @@ function deleteComment(commId) {
                 loadForumComments(window.currentEventId, true);
             }
         } else {
-            alert(data.error || 'Failed to delete comment');
+            showFlashMessage(
+                data.error || 'Failed to delete comment', 'error');
         }
     })
     .catch(error => {
         console.error('Error deleting comment:', error);
-        alert('Failed to delete comment');
+        showFlashMessage('Failed to delete comment', 'error');
     });
 }

@@ -54,10 +54,23 @@
 <h1>Welcome!</h1>
 {% endblock %}
 
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script src="{{ url_for('static', filename='flash.js') }}"></script>
-  {% block end_scripts %}
-  {% endblock %}
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="confirm-modal" style="display: none;">
+    <div class="confirm-modal-content">
+        <h2 id="confirm-title">Confirm Action</h2>
+        <p id="confirm-message">Are you sure?</p>
+        <div class="confirm-modal-actions">
+            <button id="confirm-yes-btn" class="btn-confirm">Yes</button>
+            <button id="confirm-no-btn" class="btn-cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="{{ url_for('static', filename='flash.js') }}"></script>
+<script src="{{ url_for('static', filename='flash_helper.js') }}"></script>
+{% block end_scripts %}
+{% endblock %}
   
 </body>
 </html>

@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const end = document.getElementById('event-end').value;
             
             // Make sure the event end time is after start time
-            if (start && end && end <= start) {
+            if (start && end && end < start) {
                 e.preventDefault();
-                alert('End time must be after start time');
+                showFlashMessage('End time cannot be before start time', 'error');
                 return false;
             }
         });
@@ -34,12 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('password').value;
             const confirmPassword = 
                 document.getElementById('confirm_password').value;
-            const email = document.getElementById('email').value;
             
             // Check that passwords match
             if (password !== confirmPassword) {
                 e.preventDefault();
-                alert('Passwords do not match');
+                showFlashMessage('Passwords do not match', 'error');
                 return false;
             }
             

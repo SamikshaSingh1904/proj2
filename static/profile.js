@@ -23,4 +23,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add hover cursor
         item.style.cursor = 'pointer';
     });
+
+    // Handle delete account button
+    const deleteAccountForm = document.getElementById('delete-account-form');
+    if (deleteAccountForm) {
+        deleteAccountForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            showConfirmModal(
+                'Delete account? This action cannot be undone.',
+                () => deleteAccountForm.submit(),
+                'Delete Account'
+            );
+        });
+    }
 });

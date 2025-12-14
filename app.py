@@ -193,8 +193,8 @@ def create_event():
         error = True
 
     # TIME VALIDATION 
-    if start_str and end_str and start_str >= end_str:
-        flash("End time must be after start time.", 'error')
+    if start_str and end_str and start_str > end_str:
+        flash("End time cannot be before start time.", 'error')
         error = True
 
     #capacity handling that defaults to 10 
@@ -545,8 +545,8 @@ def edit_event(eid):
                 error = True
 
         # TIME VALIDATION
-        if start_str and end_str and start_str >= end_str:
-            flash("End time must be after start time.", 'error')
+        if start_str and end_str and start_str > end_str:
+            flash("End time cannot be before start time.", 'error')
             error = True
 
         #capacity handling 
