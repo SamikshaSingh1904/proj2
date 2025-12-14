@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 import secrets
 import cs304dbi as dbi
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import wraps
 import event as e 
 import form
@@ -723,6 +723,13 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     """Handle user registration"""
+    today = date.today()
+
+    # If it's June or later, advance class year
+    base_year = today.year + 1 if today.month >= 6 else today.year
+
+    class_years = [base_year + i for i in range(4)]
+
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
@@ -825,7 +832,9 @@ def signup():
             return redirect(url_for('signup'))
     
     # GET request - show signup form
-    return render_template('signup.html', page_title='Sign Up')
+    return render_template('signup.html', 
+                           page_title='Sign Up', 
+                           class_years=class_years)
 
 @app.route('/logout')
 def logout():
@@ -888,6 +897,12 @@ def profile():
 def edit_profile():
     '''Similar to edit_event - show form and handle updates'''
     conn = get_conn()
+    today = date.today()
+
+    # If it's June or later, advance class year
+    base_year = today.year + 1 if today.month >= 6 else today.year
+
+    class_years = [base_year + i for i in range(4)]
     
     # Get current user info
     user = password_db.get_user_profile(conn, session['uid'])
@@ -954,7 +969,8 @@ def edit_profile():
     # GET request - show edit form
     return render_template('edit_profile.html', 
                           page_title='Edit Profile',
-                          user=user)
+                          user=user,
+                          class_years=class_years)
 
 @app.route('/profile/delete', methods=['POST'])
 @login_required
