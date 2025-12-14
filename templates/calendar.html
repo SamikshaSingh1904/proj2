@@ -16,12 +16,10 @@
             data-week-start="{{ week_start.strftime('%Y-%m-%d') }}">
             <div class="calendar-header">
                 <div class="nav-left">
-                    <button id="prev-week" 
-                            class="nav-btn">← Previous Week
-                    </button>
-                    <button id="today-btn" 
-                            class="today-btn">Today
-                    </button>
+                    <a href="{{ url_for('calendar', date_str=(week_start - timedelta(days=7)).strftime('%Y-%m-%d'), category=active_category if active_category != 'all' else None) }}" 
+                        class="nav-btn">← Previous Week</a>
+                    <a href="{{ url_for('calendar', category=active_category if active_category != 'all' else None) }}" 
+                        class="today-btn">Today</a>
                 </div>
                 <h2 id="current-week-display">
                     Week of {{ week_start.strftime('%b %d') }} - 
@@ -30,32 +28,39 @@
                 <div class="nav-right">
                     <a href="{{ url_for('create_event') }}" 
                         class="add-event-btn">+ Add Event</a>
-                    <button id="next-week" 
-                            class="nav-btn">Next Week →
-                    </button>
+                    <a href="{{ url_for('calendar', date_str=(week_start + timedelta(days=7)).strftime('%Y-%m-%d'), category=active_category if active_category != 'all' else None) }}" 
+                        class="nav-btn">Next Week →</a>
                 </div>
             </div>
 
 
-            <!-- ========== CATEGORY FILTER BUTTONS ========== -->
+            <!-- ========== START: CATEGORY FILTER BUTTONS ========== -->
             <div class="category-filters">
-                <button class="filter-toggle active" 
-                        data-category="all">All Events</button>
-                <button class="filter-toggle" 
-                        data-category="Carpooling">🚗 Carpooling</button>
-                <button class="filter-toggle" 
-                        data-category="Hobby & Fitness">
-                        🏋️ Hobby & Fitness</button>
-                <button class="filter-toggle" 
-                        data-category="Help & Support">
-                        🌱 Help & Support</button>
-                <button class="filter-toggle" 
-                        data-category="Study Groups">
-                        📚 Study Groups</button>
-                <button class="filter-toggle" 
-                        data-category="Social Events">
-                        🎉 Social Events</button>
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d')) }}" 
+                class="filter-toggle {% if active_category == 'all' %}active{% endif %}" 
+                data-category="all">All Events</a>
+                
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d'), category='Carpooling') }}" 
+                class="filter-toggle {% if active_category == 'Carpooling' %}active{% endif %}" 
+                data-category="Carpooling">🚗 Carpooling</a>
+                
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d'), category='Hobby & Fitness') }}" 
+                class="filter-toggle {% if active_category == 'Hobby & Fitness' %}active{% endif %}" 
+                data-category="Hobby & Fitness">🏋️ Hobby & Fitness</a>
+                
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d'), category='Help & Support') }}" 
+                class="filter-toggle {% if active_category == 'Help & Support' %}active{% endif %}" 
+                data-category="Help & Support">🌱 Help & Support</a>
+                
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d'), category='Study Groups') }}" 
+                class="filter-toggle {% if active_category == 'Study Groups' %}active{% endif %}" 
+                data-category="Study Groups">📚 Study Groups</a>
+                
+                <a href="{{ url_for('calendar', date_str=week_start.strftime('%Y-%m-%d'), category='Social Events') }}" 
+                class="filter-toggle {% if active_category == 'Social Events' %}active{% endif %}" 
+                data-category="Social Events">🎉 Social Events</a>
             </div>
+            <!-- ========== END: CATEGORY FILTER BUTTONS ========== -->
             
 
             <div class="calendar-grid">

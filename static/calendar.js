@@ -11,77 +11,6 @@
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Get week start date from data attribute
-    const calendarSection = document.querySelector('.calendar-section');
-    let currentWeekStart = null;
-
-    if (calendarSection && calendarSection.dataset.weekStart) {
-        currentWeekStart = calendarSection.dataset.weekStart;
-    }
-
-    // Navigate weeks
-    document.getElementById('prev-week').addEventListener('click', function() {
-        if (currentWeekStart) {
-            // Parse the date string properly (YYYY-MM-DD)
-            const parts = currentWeekStart.split('-');
-            // Month 0-indexed
-            const date = new Date(parts[0], parts[1] - 1, parts[2]); 
-            date.setDate(date.getDate() - 7); // Go back 1 week
-            
-            // Format back to YYYY-MM-DD
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const newDate = `${year}-${month}-${day}`;
-
-            // Preserve category filter
-            const activeCategory = document
-                .querySelector('.filter-toggle.active').dataset.category;
-            const categoryParam = 
-                activeCategory !== 'all' 
-                ? `?category=${encodeURIComponent(activeCategory)}` : '';
-            
-            window.location.href = `/calendar/${newDate}${categoryParam}`;
-        }
-    });
-
-    document.getElementById('next-week').addEventListener('click', function() {
-        if (currentWeekStart) {
-            // Parse the date string properly (YYYY-MM-DD)
-            const parts = currentWeekStart.split('-');
-            // Month is 0-indexed
-            const date = new Date(parts[0], parts[1] - 1, parts[2]); 
-            date.setDate(date.getDate() + 7); // Go forward 1 week
-            
-            // Format back to YYYY-MM-DD
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const newDate = `${year}-${month}-${day}`;
-
-            // Preserve category filter
-            const activeCategory = document
-                .querySelector('.filter-toggle.active').dataset.category;
-            const categoryParam = 
-                activeCategory !== 'all' 
-                ? `?category=${encodeURIComponent(activeCategory)}` : '';
-            
-            window.location.href = `/calendar/${newDate}${categoryParam}`;
-        }
-    });
-
-    // Today button - go back to current week
-    document.getElementById('today-btn').addEventListener('click', function() {
-        // Preserve category filter
-        const activeCategory = document
-            .querySelector('.filter-toggle.active').dataset.category;
-        const categoryParam = 
-            activeCategory !== 'all' 
-            ? `?category=${encodeURIComponent(activeCategory)}` : '';
-
-        window.location.href = `/calendar/${categoryParam}`;
-    });
-
     // Add click handlers to event blocks
     document.querySelectorAll('.event-block').forEach(function(eventBlock) {
         eventBlock.addEventListener('click', function() {
@@ -91,62 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-
     // Add click handler to close button
     const closeBtn = document.querySelector('.close-panel-btn');
     if (closeBtn) {
         closeBtn.addEventListener('click', closeEventPanel);
     }
     
-    // ========== CATEGORY FILTER FUNCTIONALITY ==========
-    // Add event listeners to category filter buttons
-    document.querySelectorAll('.filter-toggle').forEach(button => {
-        button.addEventListener('click', function() {
-            const category = this.getAttribute('data-category');
-            
-            // Update active button
-            document.querySelectorAll('.filter-toggle').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            // Filter events
-            const allEvents = document.querySelectorAll('.event-block');
-            allEvents.forEach(event => {
-                const eventCategory = event.getAttribute('data-category');
-                if (category === 'all' || eventCategory === category) {
-                    event.style.display = 'block';
-                } else {
-                    event.style.display = 'none';
-                }
-            });
-        });
-    });
-    // ========== END FILTER FUNCTIONALITY ==========
-
-    // Restore category filter from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryFromUrl = urlParams.get('category');
-
-    if (categoryFromUrl) {
-        // Find and click the matching filter button
-        const matchingButton = document
-            .querySelector(
-                `.filter-toggle[data-category="${categoryFromUrl}"]`);
-        if (matchingButton) {
-            matchingButton.click();
-        }
-    }
 });
 
 
-
-
-
-
-function loadWeek(offset) {
-    window.location.href = `/calendar/?offset=${offset}`;
-}
 
 // Open event panel (split screen)
 function openEventPanel(eventId) {

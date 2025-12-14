@@ -93,9 +93,16 @@ def calendar(date_str=None):
     days_since_sunday = (target_date.weekday() + 1) % 7
     start_of_week = target_date - timedelta(days=days_since_sunday)
     end_of_week = start_of_week + timedelta(days=6)
+
+    # Get category filter from query params
+    category_filter = request.args.get('category')
     
     # Fetch ALL events for the week
     events = e.get_week_events(conn, start_of_week, end_of_week)
+
+    # Filter by category if specified
+    if category_filter and category_filter != 'all':
+        events = [evt for evt in events if evt['category'] == category_filter]
 
     # Get today's date for highlighting
     today = datetime.now().date()
@@ -111,7 +118,8 @@ def calendar(date_str=None):
                          today=today,
                          logged_in=logged_in,
                          datetime=datetime,
-                         timedelta=timedelta)
+                         timedelta=timedelta,
+                         active_category=category_filter or 'all')
 
 @app.route('/create_event/', methods=['GET', 'POST'])
 @login_required
@@ -1311,7 +1319,10 @@ def api_delete_comment(commId):
 
 @app.template_filter('time_ago')
 def time_ago_filter(timestamp):
-    """Format timestamp as 'X hours ago', 'X days ago', etc."""
+    """
+    Format timestamp as 'X hours ago', 'X days ago', etc.
+    This is used in our Jinja2 templates to convert times as they're rendered.
+    """
     if not timestamp:
         return 'just now'
     
