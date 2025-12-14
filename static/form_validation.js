@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (signupForm) {
         signupForm.addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
+            const confirmPassword = 
+                document.getElementById('confirm_password').value;
             const email = document.getElementById('email').value;
             
             // Check that passwords match
