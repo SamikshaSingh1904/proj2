@@ -36,7 +36,10 @@
         <input type="date"
               id="event-date"
               name="date"
-              value="{%- if event.date -%}
+              value="
+              {%- if event.date is string -%}
+                {{ event.date }}
+              {%- else -%}
                   {{ event.date.strftime('%Y-%m-%d') }}
               {%- endif -%}"
               required>
@@ -59,10 +62,10 @@
             <span class="required">*</span>
           </label>
           <input type="time"
-                id="event-end"
-                name="end"
-                value="{{ event.end }}"
-                required>
+                  id="event-end"
+                  name="end"
+                  value="{{ event.end }}"
+                  required>
         </div>
       </div>
 

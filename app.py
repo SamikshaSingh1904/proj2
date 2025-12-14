@@ -55,6 +55,16 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Helper function to normalize time
+def to_time(t):
+    """
+    Takes a string and normalizes it into a time object. Used
+    only in edit_event to ensure start/end time validation
+    """
+    if len(t) == 5:
+        t += ":00"
+    return datetime.strptime(t, "%H:%M:%S").time()
+
 # ==========
 # APP ROUTES
 # ==========
@@ -482,6 +492,7 @@ def edit_event(eid):
     if request.method == 'POST':
         # Handle the edit form submission, update event, and
         # redirect back to event page
+        
         # Get form data
         title = request.form.get('title').strip()
         desc = request.form.get('desc').strip()
@@ -545,7 +556,9 @@ def edit_event(eid):
                 error = True
 
         # TIME VALIDATION
-        if start_str and end_str and start_str > end_str:
+        start_time = to_time(start_str)
+        end_time   = to_time(end_str)
+        if start_time and end_time and start_time > end_time:
             flash("End time cannot be before start time.", 'error')
             error = True
 

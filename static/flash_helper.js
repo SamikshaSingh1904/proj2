@@ -3,8 +3,8 @@
   Authors: Beatrix Kim
 
   Purpose:
-    Shared helper functions for showing flash messages and confirmation modals
-    across all pages of the application.
+    Shared helper functions for showing flash messages and confirmation pop-ups
+    across all pages of our app
 */
 
 /**
