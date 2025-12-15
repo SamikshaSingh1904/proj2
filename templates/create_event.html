@@ -68,7 +68,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="event-city">City 
+          <label for="event-city">City/Room
             <span class="required">*</span>
           </label>
           <input type="text"
@@ -115,7 +115,8 @@
                   name="event-desc"
                   rows="4"
                   maxlength="300"
-                  placeholder="Add event details">{{ desc or '' }}</textarea>
+                  placeholder="Add details, building, etc.">{{- desc or '' -}}
+        </textarea>
         <span class="helper-text">Maximum 300 characters</span>
       </div>
 
@@ -147,7 +148,7 @@
       <div class="form-group">
         <label for="event-photo">Event photo <span class="helper-text">(optional)</span></label>
         <input type="file" id="event-photo" name="event-photo" accept="image/*">
-        <div class="helper-text">Upload an image (max 1MB).</div>
+        <div class="helper-text">Upload an image (max 5MB).</div>
       </div>
 
       <button type="submit" class="btn-submit">Create Event</button>

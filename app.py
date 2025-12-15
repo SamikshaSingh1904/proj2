@@ -9,7 +9,7 @@ Features:
 - Event forums with comments and JSON API for AJAX
 """
 
-from flask import (Flask, render_template, make_response, url_for, request,
+from flask import (Flask, render_template, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
@@ -28,9 +28,10 @@ from pymysql.err import DataError
 import os
 import imghdr
 
-app.config['PROFILE_UPLOADS'] = '/students/bl108/cs304/proj2/profile_uploads' 
-app.config['UPLOADS'] = '/students/bl108/cs304/proj2/uploads'  
-app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.config['PROFILE_UPLOADS'] = os.path.join(BASE_DIR, 'profile_uploads')
+app.config['UPLOADS'] = os.path.join(BASE_DIR, 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 5*1024*1024 
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
