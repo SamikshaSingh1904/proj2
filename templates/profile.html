@@ -14,7 +14,13 @@
   <div class="profile-header">
     <div class="profile-info">
       <div class="profile-avatar">
-        {{ user.name[0].upper() }}
+        {% if user.profile_filename %}
+          <img class="profile-avatar-img"
+              src="{{ url_for('profile_pic', uid=user.uid) }}?v={{ user.profile_filename }}"
+              alt="Profile photo">
+        {% else %}
+          {{ user.name[0].upper() }}
+        {% endif %}
       </div>
       <div class="profile-details">
         <div class="profile-name">{{ user.name }}</div>

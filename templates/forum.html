@@ -79,6 +79,11 @@
                         {% endif %}
                     </span>
                 </div>
+                {% if event.filename %}
+                <img class="event-photo"
+                    src="{{ url_for('event_photo', eid=event.eid) }}"
+                    alt="Event photo">
+                {% endif %}
             </div>
         </div>
         {% endfor %}

@@ -18,7 +18,9 @@
     </p> 
 
     <form action="{{ url_for('edit_event', eid=event.eid) }}" 
-          method="POST" id="event-form">
+          method="POST" 
+          enctype="multipart/form-data"
+          id="event-form">
 
       <div class="form-group">
         <label for="event-title">Title <span class="required">*</span></label>
@@ -147,6 +149,39 @@
           Time is flexible?
         </label>
       </div>
+
+      <div class="form-group">
+        {% if event.filename %}
+          <label for="event-photo">
+            Replace event photo
+            <span class="helper-text">(optional)</span>
+          </label>
+        {% else %}
+          <label for="event-photo">
+            Upload event photo
+            <span class="helper-text">(optional)</span>
+          </label>
+        {% endif %}
+
+        <input type="file"
+              id="event-photo"
+              name="event-photo"
+              accept="image/*">
+      </div>
+
+      {% if event.filename %}
+        <div class="form-group">
+          <div class="helper-text">Current photo:</div>
+          <img src="{{ url_for('event_photo', eid=event.eid) }}"
+              alt="Current event photo"
+              style="
+                max-width: 100%;
+                max-height: 260px;
+                object-fit: cover;
+                border-radius: 12px;
+              ">
+        </div>
+      {% endif %}
 
       <button type="submit" class="btn-submit">Update Event</button>
 

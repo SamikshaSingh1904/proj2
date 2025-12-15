@@ -120,6 +120,9 @@
                                 <div class="event-time">
                                     {{ event.start_formatted }}
                                 </div>
+                                <div class="event-location">
+                                    {{ event.city }}, {{ event.state }}
+                                </div>
                                 <div class="event-cal-title">
                                     {{ event.title }}
                                 </div>
@@ -161,6 +164,11 @@
                     <p><strong>Description:</strong></p>
                     <p id="panel-event-desc"></p>
                 </div>
+
+                <img id="panel-event-photo"
+                    class="panel-event-photo"
+                    alt="Event photo"
+                    style="display: none;">
 
                 <div class="event-detail-section">
                     <h3>Participants</h3>

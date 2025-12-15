@@ -19,12 +19,18 @@ import cs304dbi as dbi
 from datetime import datetime, timedelta, date
 from functools import wraps
 import event as e 
+import profile as profile_db
 import form
 import forum as forum_db
 import bcrypt
 import password as password_db
 from pymysql.err import DataError
+import os
+import imghdr
 
+app.config['PROFILE_UPLOADS'] = '/students/bl108/cs304/proj2/profile_uploads' 
+app.config['UPLOADS'] = '/students/bl108/cs304/proj2/uploads'  
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -163,6 +169,18 @@ def create_event():
     cap_str = request.form.get('event-cap', '').strip()
     cid_str = request.form.get('event-cid', '').strip()
 
+    filename = None
+    f = request.files.get('event-photo')
+
+    if f and f.filename:
+        user_filename = f.filename
+        ext = user_filename.split('.')[-1].lower()
+
+        # save with a safe, non-user-chosen filename
+        filename = secure_filename(
+            f'event_{uid}_{secrets.token_hex(8)}.{ext}'
+        )
+
     error = False
 
     # LENGTH VALIDATIONS 
@@ -233,6 +251,15 @@ def create_event():
             flash("Invalid category.", 'error')
             error = True
 
+    # if a file was provided, verify it is actually an image before saving
+    if f and f.filename:
+        # peek at file type from content; imghdr reads the file header
+        kind = imghdr.what(f)
+        if kind not in ('jpeg', 'png', 'gif', 'webp'):
+            flash('Uploaded file is not a supported image type.', 'error')
+            error = True
+            filename = None
+
     #if any errors, re-render the form with previous values 
     if error:
         return render_template(
@@ -253,13 +280,19 @@ def create_event():
     # Get flexible checkbox value
     flexible = request.form.get('event-flexible') == 'on'
 
+    # Save uploaded file (only after validations pass)
+    if filename:
+        pathname = os.path.join(app.config['UPLOADS'], filename)
+        f.save(pathname)
+        os.chmod(pathname, 0o444)  # readable by all team members
+
     try:
         #insert event and auto-add creator 
         eid = form.insert_event(
             conn,
             title, date_str, start_str, end_str,
             desc, uid, city, state, cap, 
-            flexible=flexible, cid=cid
+            flexible=flexible, cid=cid, filename=filename
         )
 
         form.add_participant(conn, eid, uid)
@@ -507,6 +540,22 @@ def edit_event(eid):
 
         error = False
 
+        # optional replacement photo upload
+        new_filename = None
+        f = request.files.get('event-photo')
+
+        if f and f.filename:
+            user_filename = f.filename
+            ext = user_filename.split('.')[-1].lower()
+            new_filename = secure_filename(
+                f'event_{session["uid"]}_{secrets.token_hex(8)}.{ext}'
+            )
+
+            kind = imghdr.what(f)
+            if kind not in ('jpeg', 'png', 'gif', 'webp'):
+                flash('Uploaded file is not a supported image type.', 'error')
+                error = True
+
         # LENGTH VALIDATIONS
         if len(title) > 30:
             flash("Title must be 30 characters or less.", 'error')
@@ -607,10 +656,15 @@ def edit_event(eid):
                 event=event
             )
         
+        if new_filename:
+            pathname = os.path.join(app.config['UPLOADS'], new_filename)
+            f.save(pathname)
+            os.chmod(pathname, 0o444)
+
         # Update event in database
         e.update_event(conn, eid, title, desc, date_str, start_str, end_str,
-                       city, state, cap, flexible, cid)
-        
+                       city, state, cap, flexible, cid, filename=new_filename)
+
         flash('Event updated successfully', 'success')
         return redirect(url_for('view_event_forum', eid=eid))
     
@@ -891,7 +945,23 @@ def profile():
     except Exception as ex:
         flash(f'Error loading profile: {str(ex)}', 'error')
         return redirect(url_for('forum'))
-    
+
+@app.route('/profile-pic/<int:uid>')
+def profile_pic(uid):
+    """Serve a user's uploaded profile pic (if any)."""
+    conn = get_conn()
+    filename = profile_db.get_profile_photo_filename(conn, uid)
+
+    if filename is None:
+        flash('User not found', 'error')
+        return redirect(url_for('profile'))
+
+    if not filename:
+        flash('No profile picture for that user', 'error')
+        return redirect(url_for('profile'))
+
+    return send_from_directory(app.config['PROFILE_UPLOADS'], filename)
+
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -956,12 +1026,32 @@ def edit_profile():
                                  page_title='Edit Profile',
                                  user=user)
         
+        f = request.files.get('profile_photo')
+        new_filename = None
+
+        if f and f.filename:
+            kind = imghdr.what(f)
+            if kind not in ('jpeg', 'png', 'gif', 'webp'):
+                flash('Uploaded file is not a supported image type.', 'error')
+                return render_template('edit_profile.html', user=user, class_years=class_years)
+
+            ext = 'jpg' if kind == 'jpeg' else kind
+            new_filename = secure_filename(
+                f'uid_{session["uid"]}_{secrets.token_hex(8)}.{ext}'
+            )
+
         # Update user profile in database
         password_db.update_user_profile(conn, session['uid'], 
                                        name, bio, year_int, pronouns)
         
         # Update session with new name
         session['name'] = name
+
+        if new_filename:
+            pathname = os.path.join(app.config['PROFILE_UPLOADS'], new_filename)
+            f.save(pathname)
+            os.chmod(pathname, 0o444)
+            profile_db.upsert_profile_photo(conn, session['uid'], new_filename)
         
         flash('Profile updated successfully', 'success')
         return redirect(url_for('profile'))
@@ -993,6 +1083,25 @@ def delete_account():
     except Exception as ex:
         flash(f'Error deleting account: {str(ex)}', 'error')
         return redirect(url_for('profile'))
+
+
+@app.route('/event-photo/<int:eid>')
+def event_photo(eid):
+    """Serve an event's uploaded photo (if any)."""
+    conn = get_conn()
+
+    filename = e.get_event_photo_filename(conn, eid)
+
+    if filename is None:
+        flash('Event not found', 'error')
+        return redirect(url_for('forum'))
+
+    if not filename:
+        flash('No photo for this event', 'error')
+        return redirect(url_for('view_event_forum', eid=eid))
+
+    return send_from_directory(app.config['UPLOADS'], filename)
+
 
 # =======================
 # API ENDPOINTS FOR AJAX
@@ -1059,6 +1168,13 @@ def get_event_details(eid):
             } for p in participants
         ]
     }
+
+    photo_url = None
+    if event_data.get('filename'):
+        photo_url = url_for('event_photo', eid=eid)
+
+    response['photo_url'] = photo_url
+
     return jsonify(response)
 
 @app.route('/api/event/<int:eid>/delete', methods=['DELETE'])

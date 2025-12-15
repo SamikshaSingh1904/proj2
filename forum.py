@@ -16,7 +16,7 @@ def get_all_events_with_forums(conn, show_past=False):
     # Build query with optional date filter
     query = '''
         SELECT e.eid, e.title, e.desc, e.date, e.start, e.end,
-               e.city, e.state, e.cap,
+               e.city, e.state, e.cap, e.filename, 
                p.name as creator_name, p.uid as creator_uid,
                c.category,
                f.fid,
@@ -35,7 +35,8 @@ def get_all_events_with_forums(conn, show_past=False):
     
     query += '''
         GROUP BY e.eid, e.title, e.desc, e.date, e.start, e.end,
-                e.city, e.state, e.cap, p.name, p.uid, c.category, f.fid
+                e.city, e.state, e.cap, e.filename, p.name, p.uid, 
+                c.category, f.fid
         ORDER BY e.date ASC, e.start ASC
     '''
     
@@ -62,7 +63,7 @@ def get_event_details(conn, eid):
     curs = dbi.dict_cursor(conn)
     curs.execute('''
         SELECT e.eid, e.title, e.desc, e.date, e.start, e.end,
-               e.city, e.state, e.cap, e.flexible,
+               e.city, e.state, e.cap, e.flexible, e.filename,
                p.name as creator_name, p.uid as creator_uid,
                c.category,
                f.fid

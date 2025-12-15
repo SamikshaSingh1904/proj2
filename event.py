@@ -26,7 +26,7 @@ def get_week_events(conn, start_date, end_date):
     
     query = '''
         SELECT e.eid, e.title, e.start, e.end, e.date, e.desc,
-               e.city, e.state, e.cap, c.category
+               e.city, e.state, e.cap, e.filename, c.category
         FROM events e
         JOIN calendar c ON e.cid = c.cid
         WHERE e.date BETWEEN %s AND %s
@@ -52,7 +52,8 @@ def get_event_by_id(conn, eid):
     
     query = '''
         SELECT e.eid, e.title, e.start, e.end, e.date, e.desc,
-               e.city, e.state, e.cap, e.flexible, e.addedBy, e.cid,
+               e.city, e.state, e.cap, e.flexible, 
+               e.addedBy, e.cid, e.filename,
                p.name as creator_name, c.category
         FROM events e
         JOIN person p ON e.addedBy = p.uid
@@ -88,15 +89,26 @@ def delete_event_by_id(conn, eid):
     conn.commit()
 
 def update_event(conn, eid, title, desc, date, start, 
-                 end, city, state, cap, flexible, cid):
+                 end, city, state, cap, flexible, cid, filename=None):
     """Update an existing event in the database"""
     curs = dbi.dict_cursor(conn)
-    curs.execute('''
-        UPDATE events 
-        SET title=%s, `desc`=%s, date=%s, start=%s, end=%s, 
-            city=%s, state=%s, cap=%s, flexible=%s, cid=%s
-        WHERE eid=%s
-    ''', [title, desc, date, start, end, city, state, cap, flexible, cid, eid])
+    if filename is None:
+        curs.execute('''
+            UPDATE events
+            SET title=%s, `desc`=%s, date=%s, start=%s, end=%s,
+                city=%s, state=%s, cap=%s, flexible=%s, cid=%s
+            WHERE eid=%s
+        ''', [title, desc, date, start, end, city, state, cap, flexible, cid, eid])
+    else:
+        curs.execute('''
+            UPDATE events
+            SET title=%s, `desc`=%s, date=%s, start=%s, end=%s,
+                city=%s, state=%s, cap=%s, flexible=%s, cid=%s,
+                filename=%s
+            WHERE eid=%s
+        ''', [title, desc, date, start, end, city, state, cap, flexible, cid,
+            filename, eid])
+    
     conn.commit()
 
 def get_participant_count(conn, eid):
@@ -109,3 +121,23 @@ def get_participant_count(conn, eid):
     query = 'SELECT COUNT(*) FROM participants WHERE eid = %s'
     curs.execute(query, (eid,))
     return curs.fetchone()[0]
+
+def update_event_filename(conn, eid, filename):
+    curs = dbi.dict_cursor(conn)
+    curs.execute(
+        '''UPDATE events SET filename=%s WHERE eid=%s''',
+        [filename, eid]
+    )
+    conn.commit()
+
+def get_event_photo_filename(conn, eid):
+    """Return the filename of an event's photo, or None."""
+    curs = dbi.dict_cursor(conn)
+    n = curs.execute(
+        'select filename from events where eid = %s',
+        [eid]
+    )
+    if n == 0:
+        return None  # event not found
+    row = curs.fetchone()
+    return row['filename']

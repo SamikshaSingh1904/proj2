@@ -74,7 +74,7 @@ def get_user_profile(conn, uid):
     """Get user profile information"""
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-        SELECT uid, name, email, bio, year, pronouns
+        SELECT uid, name, email, bio, year, pronouns, profile_filename
         FROM person
         WHERE uid = %s
     ''', [uid])

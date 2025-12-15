@@ -90,6 +90,16 @@ function openEventPanel(eventId) {
             document.getElementById('panel-event-capacity').textContent = 
                 `${data.current_participants}/${data.cap} spots filled`;
 
+            const photoEl = document.getElementById('panel-event-photo');
+            if (photoEl) {
+                if (data.photo_url) {
+                    photoEl.src = data.photo_url;
+                    photoEl.style.display = 'block';
+                } else {
+                    photoEl.removeAttribute('src');
+                    photoEl.style.display = 'none';
+                }
+            }
             // Display participants
             const participantsList = 
                 document.getElementById('panel-participants-list');

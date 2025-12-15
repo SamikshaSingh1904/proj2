@@ -16,7 +16,7 @@ def get_categories(conn):
 
 def insert_event(conn, title, date_str, start_str, end_str,
                  desc, uid, city, state, cap,
-                 flexible, cid):
+                 flexible, cid, filename):
     """
     Insert a new event into the events table and return its eid.
 
@@ -30,10 +30,10 @@ def insert_event(conn, title, date_str, start_str, end_str,
     sql = '''
         INSERT INTO events
             (title, `start`, `end`, `date`, `desc`,
-             addedBy, city, state, cap, flexible, cid)
+             addedBy, city, state, cap, flexible, cid, filename)
         VALUES
             (%s, %s, %s, %s, %s,
-             %s, %s, %s, %s, %s, %s)
+             %s, %s, %s, %s, %s, %s, %s)
     '''
 
     # If start_str / end_str are empty strings, convert to None so MySQL
@@ -52,7 +52,8 @@ def insert_event(conn, title, date_str, start_str, end_str,
         state,
         cap,
         flexible,
-        cid
+        cid,
+        filename
     ])
     conn.commit()
     eid = curs.lastrowid
