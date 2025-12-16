@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Make sure the event end time is after start time
             if (start && end && end < start) {
                 e.preventDefault();
-                showFlashMessage('End time cannot be before start time', 'error');
+                showFlashMessage('End time cannot be before start time', 
+                                'error');
                 return false;
             }
         });

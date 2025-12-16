@@ -45,6 +45,49 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         });
     }
+
+    // Handle main comment form submission
+    const mainCommentForm = document.getElementById('main-comment-form');
+    if (mainCommentForm) {
+        mainCommentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const textarea = document.getElementById('comment-text');
+            const text = textarea.value.trim();
+            
+            if (!text) {
+                showFlashMessage('Please enter a comment', 'error');
+                return;
+            }
+
+            if (text.length > 300) {
+                showFlashMessage(
+                    'Comment must be 300 characters or less', 'error');
+                return;
+            }
+            
+            fetch(`/api/event/${eventId}/forum/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    textarea.value = '';
+                    loadForumComments(eventId, true);
+                } else {
+                    showFlashMessage(
+                        data.error || 'Failed to post comment', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+                showFlashMessage('Failed to post comment', 'error');
+            });
+        });
+    }
 });
 
 // Load forum comments (reuse from calendar.js with slight modifications)
@@ -224,6 +267,11 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
             showFlashMessage('Please enter a reply', 'error');
             return;
         }
+        if (text.length > 300) {
+            showFlashMessage(
+                'Comment must be 300 characters or less', 'error');
+            return;
+        }
         submitReply(parentCommId, eventId, text);
     };
 
@@ -305,42 +353,4 @@ function formatCommentTime(timestamp) {
         return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
     }
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-}
-
-// Handle main comment form submission
-const mainCommentForm = document.getElementById('main-comment-form');
-if (mainCommentForm) {
-    mainCommentForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const eventId = parseInt(document.body.dataset.eventId);
-        const textarea = document.getElementById('comment-text');
-        const text = textarea.value.trim();
-        
-        if (!text) {
-            showFlashMessage('Please enter a comment', 'error');
-            return;
-        }
-        
-        fetch(`/api/event/${eventId}/forum/comment`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ text: text })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                textarea.value = '';
-                loadForumComments(eventId, true);
-            } else {
-                showFlashMessage(
-                    data.error || 'Failed to post comment', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error posting comment:', error);
-            showFlashMessage('Failed to post comment', 'error');
-        });
-    });
 }

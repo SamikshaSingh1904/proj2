@@ -98,7 +98,8 @@ def update_event(conn, eid, title, desc, date, start,
             SET title=%s, `desc`=%s, date=%s, start=%s, end=%s,
                 city=%s, state=%s, cap=%s, flexible=%s, cid=%s
             WHERE eid=%s
-        ''', [title, desc, date, start, end, city, state, cap, flexible, cid, eid])
+        ''', [title, desc, date, start, end, city, state, cap, flexible, 
+              cid, eid])
     else:
         curs.execute('''
             UPDATE events

@@ -16,7 +16,8 @@
       <div class="profile-avatar">
         {% if user.profile_filename %}
           <img class="profile-avatar-img"
-              src="{{ url_for('profile_pic', uid=user.uid) }}?v={{ user.profile_filename }}"
+              src="{{ url_for('profile_pic', uid=user.uid) -}}
+                   ?v={{ user.profile_filename }}"
               alt="Profile photo">
         {% else %}
           {{ user.name[0].upper() }}
@@ -87,7 +88,8 @@
           <div class="event-item-title">
             {{ event.title }}
           </div>
-          <span class="event-category-badge">
+          <span class="event-category-badge" 
+                data-category="{{ event.category }}">
             {{ event.category }}
           </span>
         </div>
@@ -139,7 +141,8 @@
           <div class="event-item-title">
             {{ event.title }}
           </div>
-          <span class="event-category-badge">
+          <span class="event-category-badge" 
+                data-category="{{ event.category }}">
             {{ event.category }}
           </span>
         </div>

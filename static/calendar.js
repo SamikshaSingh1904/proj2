@@ -494,6 +494,11 @@ function showInlineReplyForm(commentDiv, parentCommId, eventId) {
             showFlashMessage('Please enter a reply', 'error');
             return;
         }
+
+        if (text.length > 300) {
+            showFlashMessage('Reply must be 300 characters or less', 'error');
+            return;
+        }
         submitReply(parentCommId, eventId, text);
     };
 
@@ -567,6 +572,11 @@ function submitComment(eventId) {
     
     if (!commentText) {
         showFlashMessage('Please enter a comment', 'error');
+        return;
+    }
+
+    if (commentText.length > 300) {
+        showFlashMessage('Comment must be 300 characters or less', 'error');
         return;
     }
     

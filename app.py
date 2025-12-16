@@ -23,14 +23,12 @@ import profile as profile_db
 import form
 import forum as forum_db
 import bcrypt
-import password as password_db
 from pymysql.err import DataError
 import os
 import imghdr
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-app.config['PROFILE_UPLOADS'] = os.path.join(BASE_DIR, 'profile_uploads')
-app.config['UPLOADS'] = os.path.join(BASE_DIR, 'uploads')
+app.config['PROFILE_UPLOADS'] = '/students/clump/profile_uploads'
+app.config['UPLOADS'] = '/students/clump/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 5*1024*1024 
 
 # we need a secret_key to use flash() and sessions
@@ -229,7 +227,7 @@ def create_event():
     #capacity handling that defaults to 10 
     cap = None
     if cap_str:
-        if cap_str.isnumeric():
+        try:
             cap = int(cap_str)
             if cap < 2:
                 flash("Capacity must be at least 2.", 'error')
@@ -237,8 +235,8 @@ def create_event():
             elif cap > 10000:
                 flash("Capacity cannot exceed 10,000.", 'error')
                 error = True
-        else:
-            flash("Capacity must be a positive integer.", 'error')
+        except (ValueError, OverflowError):
+            flash("Capacity must be a valid positive integer.", 'error')
             error = True
     else:
         cap = 10
@@ -256,7 +254,7 @@ def create_event():
     if f and f.filename:
         # peek at file type from content; imghdr reads the file header
         kind = imghdr.what(f)
-        if kind not in ('jpeg', 'png', 'gif', 'webp'):
+        if kind not in ('jpeg', 'png', 'gif', 'jpg'):
             flash('Uploaded file is not a supported image type.', 'error')
             error = True
             filename = None
@@ -410,6 +408,10 @@ def add_comment_to_event(eid):
             flash('Forum not found', 'error')
             return redirect(url_for('forum'))
         
+        if len(text) > 300: 
+            flash('Comment too long', 'error')
+            return redirect(url_for('view_event_forum', eid=eid))
+        
         # Insert the comment - database handles the ID
         forum_db.insert_comment(conn, text, session['uid'], fid)
         
@@ -553,7 +555,7 @@ def edit_event(eid):
             )
 
             kind = imghdr.what(f)
-            if kind not in ('jpeg', 'png', 'gif', 'webp'):
+            if kind not in ('jpeg', 'png', 'gif', 'jpg'):
                 flash('Uploaded file is not a supported image type.', 'error')
                 error = True
 
@@ -614,7 +616,7 @@ def edit_event(eid):
 
         #capacity handling 
         if cap_str:
-            if cap_str.isnumeric():
+            try:
                 cap = int(cap_str)
                 if cap < 2:
                     flash("Capacity must be at least 2.", 'error')
@@ -622,8 +624,8 @@ def edit_event(eid):
                 elif cap > 10000:
                     flash("Capacity cannot exceed 10,000.", 'error')
                     error = True
-            else:
-                flash("Capacity must be a non-negative integer.", 'error')
+            except (ValueError, OverflowError):
+                flash("Capacity must be a valid positive integer.", 'error')
                 error = True
         else:
             cap = 10
@@ -746,7 +748,7 @@ def login():
             conn = get_conn()
             
             # Get user by email
-            user = password_db.get_user_by_email(conn, email)
+            user = profile_db.get_user_by_email(conn, email)
             
             if user:
                 # Check password using bcrypt
@@ -859,7 +861,7 @@ def signup():
             # Insert new user - 
             # raises exception if email exists (thread-safe)
             # Exception caught per create_user() in password.py
-            new_uid = password_db.create_user(conn, name, email, 
+            new_uid = profile_db.create_user(conn, name, email, 
                                               hashed_password, 
                                              bio, year_int, pronouns)
             
@@ -913,15 +915,15 @@ def profile():
                                             'false').lower() == 'true'
         
         # Get user info
-        user = password_db.get_user_profile(conn, session['uid'])
+        user = profile_db.get_user_profile(conn, session['uid'])
         
         # Get user's events (as creator)
-        created_events = password_db.get_user_created_events(conn, 
+        created_events = profile_db.get_user_created_events(conn, 
                                                              session['uid'],
                                                              show_past_created)
         
         # Get events user is participating in
-        joined_events = password_db.get_user_joined_events(conn, 
+        joined_events = profile_db.get_user_joined_events(conn, 
                                                            session['uid'],
                                                            show_past_joined)
 
@@ -948,6 +950,7 @@ def profile():
         return redirect(url_for('forum'))
 
 @app.route('/profile-pic/<int:uid>')
+@login_required
 def profile_pic(uid):
     """Serve a user's uploaded profile pic (if any)."""
     conn = get_conn()
@@ -959,6 +962,10 @@ def profile_pic(uid):
 
     if not filename:
         flash('No profile picture for that user', 'error')
+        return redirect(url_for('profile'))
+    
+    if '/' in filename or '\\' in filename or '..' in filename:
+        flash('Invalid filename', 'error')
         return redirect(url_for('profile'))
 
     return send_from_directory(app.config['PROFILE_UPLOADS'], filename)
@@ -976,7 +983,7 @@ def edit_profile():
     class_years = [base_year + i for i in range(4)]
     
     # Get current user info
-    user = password_db.get_user_profile(conn, session['uid'])
+    user = profile_db.get_user_profile(conn, session['uid'])
     
     if not user:
         flash('User not found', 'error')
@@ -1032,9 +1039,11 @@ def edit_profile():
 
         if f and f.filename:
             kind = imghdr.what(f)
-            if kind not in ('jpeg', 'png', 'gif', 'webp'):
+            if kind not in ('jpeg', 'png', 'gif', 'jpg'):
                 flash('Uploaded file is not a supported image type.', 'error')
-                return render_template('edit_profile.html', user=user, class_years=class_years)
+                return render_template('edit_profile.html', 
+                                       user=user, 
+                                       class_years=class_years)
 
             ext = 'jpg' if kind == 'jpeg' else kind
             new_filename = secure_filename(
@@ -1042,7 +1051,7 @@ def edit_profile():
             )
 
         # Update user profile in database
-        password_db.update_user_profile(conn, session['uid'], 
+        profile_db.update_user_profile(conn, session['uid'], 
                                        name, bio, year_int, pronouns)
         
         # Update session with new name
@@ -1073,7 +1082,7 @@ def delete_account():
         name = session.get('name', 'User')
         
         # Delete user (CASCADE will handle events, participants, comments)
-        password_db.delete_user(conn, uid)
+        profile_db.delete_user(conn, uid)
         
         # Clear session
         session.clear()
@@ -1100,6 +1109,10 @@ def event_photo(eid):
     if not filename:
         flash('No photo for this event', 'error')
         return redirect(url_for('view_event_forum', eid=eid))
+    
+    if '/' in filename or '\\' in filename or '..' in filename:
+        flash('Invalid filename', 'error')
+        return redirect(url_for('profile'))
 
     return send_from_directory(app.config['UPLOADS'], filename)
 
@@ -1321,10 +1334,16 @@ def api_add_comment(eid):
     """
     try:        
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Invalid request'}), 400
+        
         text = data.get('text', '').strip()
         
         if not text:
             return jsonify({'error': 'Comment cannot be empty'}), 400
+        
+        if len(text) > 300:
+            return jsonify({'error': 'Comment too long'}), 400
         
         conn = get_conn()
         
@@ -1363,10 +1382,15 @@ def api_reply_to_comment(commId):
 
         eid = comment['eid']
         data = request.get_json() or {}
+        if not data:
+            return jsonify({'error': 'Invalid request'}), 400
         text = data.get('text', '').strip()
 
         if not text:
             return jsonify({'error': 'Reply cannot be empty'}), 400
+        
+        if len(text) > 300:
+            return jsonify({'error': 'Reply too long'}), 400
 
         # Get forum id for this event
         fid = forum_db.get_forum_id_by_event(conn, eid)
@@ -1405,6 +1429,10 @@ def reply_to_comment(commId):
 
         if not text:
             flash('Reply cannot be empty', 'error')
+            return redirect(url_for('view_event_forum', eid=eid))
+        
+        if len(text) > 300:
+            flash('Reply too long', 'error')
             return redirect(url_for('view_event_forum', eid=eid))
 
         # Get forum ID
